@@ -1,1 +1,19 @@
-body { margin: 0; font-family: system-ui, sans-serif; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #fff; color: #0f172a; }
+
+/* Visible focus ring for every keyboard-focusable control. */
+:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+main:focus { outline: none; }
+
+main { padding: 1rem; }
+
+.skip-link { position: absolute; left: 0.5rem; top: -3rem; padding: 0.5rem 0.75rem; background: #fff; color: #1d4ed8; z-index: 10; }
+.skip-link:focus { top: 0.5rem; }
+
+.navbar { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: #1e293b; color: #fff; }
+.navbar-brand { font-weight: 700; }
+.navbar-links { display: flex; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.navbar-links a { display: block; padding: 0.4rem 0.75rem; border-radius: 0.375rem; color: #e2e8f0; text-decoration: none; }
+.navbar-links a:hover { background: #334155; }
+.navbar-links a:focus-visible { outline-color: #93c5fd; }
+/* NavLink adds .active and aria-current="page" to the current route's link. */
+.navbar-links a.active { background: #fff; color: #1e293b; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
