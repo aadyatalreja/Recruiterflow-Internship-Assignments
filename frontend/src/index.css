@@ -17,3 +17,22 @@ main { padding: 1rem; }
 .navbar-links a:focus-visible { outline-color: #93c5fd; }
 /* NavLink adds .active and aria-current="page" to the current route's link. */
 .navbar-links a.active { background: #fff; color: #1e293b; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+.expense-form { display: flex; flex-direction: column; gap: 1rem; max-width: 32rem; }
+.field { display: flex; flex-direction: column; gap: 0.25rem; margin: 0; }
+fieldset.field { border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.75rem; }
+legend { font-weight: 600; padding: 0 0.25rem; }
+.field > label { font-weight: 600; }
+input[type='text'], input[type='date'], select { font: inherit; padding: 0.4rem 0.5rem; border: 1px solid #94a3b8; border-radius: 0.375rem; }
+[aria-invalid='true']:not(fieldset):not([type='checkbox']) { border-color: #b91c1c; }
+.field-hint { margin: 0; font-size: 0.85rem; color: #475569; }
+.field-error { margin: 0; font-size: 0.9rem; color: #b91c1c; }
+.radio-row, .member-list { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
+.member-list { flex-direction: column; }
+.inline-label { display: inline-flex; align-items: center; gap: 0.4rem; }
+.share-row { display: grid; grid-template-columns: 6rem 1fr auto; align-items: center; gap: 0.25rem 0.5rem; }
+.share-row .field-error { grid-column: 2 / -1; }
+.form-actions { display: flex; gap: 0.5rem; }
+button { font: inherit; padding: 0.5rem 1rem; border: 1px solid #94a3b8; border-radius: 0.375rem; background: #fff; color: inherit; cursor: pointer; }
+.button-primary { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+.flash { margin: 0 0 1rem; padding: 0.5rem 0.75rem; border-radius: 0.375rem; background: #dcfce7; color: #14532d; }
