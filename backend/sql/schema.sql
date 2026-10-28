@@ -1,0 +1,5 @@
+-- Recruiter Bot schema. 
+-- Run with: npm run db:init
+-- Hand-written DDL only. Tables are dropped first so re-running resets the database.
+--
+-- TODO: candidates, jobs and matches tables.

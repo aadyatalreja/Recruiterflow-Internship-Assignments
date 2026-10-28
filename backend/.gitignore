@@ -1,0 +1,6 @@
+node_modules/
+
+# Local SQLite database (recreate with npm run db:init && npm run db:seed)
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
