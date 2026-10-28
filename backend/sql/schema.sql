@@ -1,6 +1,16 @@
 -- Recruiter Bot schema. 
 -- Run with: npm run db:init
 -- Hand-written DDL only.
+--
+-- One skill per row: a candidate's skills (and traits, and a job's required skills and culture
+-- keywords) live in a child table with one row per label, not a comma-separated column. Skill
+-- overlap is then a plain JOIN on the label with COUNT(*), which an index can serve, and the
+-- composite primary key stops the same label being listed twice for one candidate or job.
+--
+-- Labels are stored as text rather than as ids into a separate skills table. A skill here has
+-- no attributes of its own (no category, no synonyms), so a lookup table would add a join to
+-- every matching query without adding information. The risk with plain labels is drift
+-- ('Research' vs 'research'), so a CHECK requires every label to be lowercase and trimmed.
 
 DROP TABLE IF EXISTS matches;
 DROP TABLE IF EXISTS job_culture_keywords;
