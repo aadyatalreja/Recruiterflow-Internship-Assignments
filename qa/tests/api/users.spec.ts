@@ -20,6 +20,12 @@ test('GET /api/users/2 returns the user with an email', async ({ request }) => {
   expect(body.data.email).not.toBe('')
 })
 
+test('GET /api/users/23 returns 404 for a user that does not exist', async ({ request }) => {
+  const response = await request.get('/api/users/23')
+
+  expect(response.status()).toBe(404)
+})
+
 test('POST /api/users creates a user named morpheus', async ({ request }) => {
   const response = await request.post('/api/users', {
     data: { name: 'morpheus', job: 'leader' },
