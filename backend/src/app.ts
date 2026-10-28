@@ -1,5 +1,6 @@
 import express, { type NextFunction, type Request, type Response } from 'express'
 import { query } from './db.ts'
+import { matchRoutes } from './matchRoutes.ts'
 
 /** Builds the Express app without starting it, so tests can use it directly. */
 export function createApp() {
@@ -10,6 +11,8 @@ export function createApp() {
     const [row] = query<{ ok: number }>('SELECT 1 AS ok')
     res.json({ status: 'ok', db: row?.ok === 1 })
   })
+
+  app.use(matchRoutes)
 
   app.use((_req, res) => {
     res.status(404).json({ error: 'Not found' })
