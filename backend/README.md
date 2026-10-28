@@ -183,4 +183,42 @@ in one transaction, so the table always holds what was last returned, and repeat
 writes the same rows. With much more data I'd flip this round: score when a candidate or job
 changes, and have the endpoints read `matches` through its `(job_id, score DESC)` index.
 
+## Part 2: SQL Detective
+
+[`sql_detective.sql`](sql_detective.sql) is self-contained and separate from the Recruiter Bot
+database. It creates the hiring-ops tables and inserts the data exactly as given, then answers
+each question with one query, preceded by a comment with its number. It's standard SQL that runs
+on SQLite. After `npm install`, this loads it into a throwaway in-memory database and prints each
+answer as a table:
+
+```bash
+npm run detective
+```
+
+With the `sqlite3` command-line tool installed, `sqlite3 -header -column :memory: < sql_detective.sql`
+does the same. Any SQLite GUI (e.g. DB Browser for SQLite) can also run the file as-is.
+
+| Q | Answer |
+|---|---|
+| 1. Open postings and their recruiter | 1 Backend Engineer I (Priya Shah), 2 Backend Engineer I (Daniel Ortiz), 4 Backend Engineer II (Priya Shah), 5 DevOps Engineer (Wei Zhang) |
+| 2. Applicants who reached Final, per posting | postings 1, 2, 4 and 7: 2 each; posting 3: 1; postings 5 and 6: 0 |
+| 3. People who applied to more than one posting | Ananya Rao (1 and 4), Ben Turner (1 and 3), Elena Popescu (2 and 7) |
+| 4. Final-stage conversion, recruiters with ≥ 3 Finals | Priya Shah 3/4 = 0.75, Daniel Ortiz 2/4 = 0.50 |
+| 5. Top recruiter by placements, per department | Engineering: Priya Shah (3); Data: Fatima Al-Sayed (1) |
+
+What the queries have to get right:
+- **Q2 lists postings with no Finals.** The `stage = 'Final'` condition is in the `LEFT JOIN`'s `ON`
+  clause; in `WHERE` it would turn the join back into an inner join and drop postings 5 and 6.
+- **Q3's trap is a duplicate person.** Ananya Rao appears twice in `applicants` with
+  `ananya.rao@mail.com` and `Ananya.Rao@mail.com`. Counted by applicant id she looks like two people
+  with one posting each, so she'd be missed; grouping by `LOWER(email)` makes her one person with
+  two. `applicants` has no job column, so which postings someone applied to comes from `interviews`.
+- **Q4 avoids integer division.** It multiplies by `1.0` before dividing, otherwise SQLite would
+  return 3/4 as 0. Fatima Al-Sayed has only one Final, so `HAVING COUNT(*) >= 3` leaves her out.
+- **Q5 uses `RANK()`, not `ROW_NUMBER()`,** so a tie for the top spot returns both recruiters
+  instead of an arbitrary one. Infrastructure has no placements, so it has no winner.
+- **Two quirks are kept as they are.** Ben Turner's Final for posting 3 has no earlier rounds there,
+  but it is a real Final, so it counts. Postings 1, 2 and 7 share the title "Backend Engineer I"
+  but are separate postings, so they're counted separately.
+
 ## Where I used AI tools

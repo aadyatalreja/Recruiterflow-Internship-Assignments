@@ -9,7 +9,8 @@
     "db:init": "tsx scripts/db-init.ts",
     "db:seed": "tsx scripts/db-seed.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test \"src/**/*.test.ts\""
+    "test": "tsx --test \"src/**/*.test.ts\"",
+    "detective": "tsx scripts/sql-detective.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
