@@ -28,6 +28,7 @@ export interface PercentSplit {
 
 export type Split = EqualSplit | ExactSplit | PercentSplit
 export type SplitType = Split['type']
+export const SPLIT_TYPES: readonly SplitType[] = ['equal', 'exact', 'percent']
 
 export interface Expense {
   id: string

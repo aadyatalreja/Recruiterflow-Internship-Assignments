@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CATEGORIES, type SplitType } from '../domain/types'
+import { CATEGORIES, SPLIT_TYPES, type SplitType } from '../domain/types'
 import {
   MAX_DESCRIPTION_LENGTH,
   buildExpense,
@@ -184,7 +184,7 @@ export default function AddExpensePage() {
         <fieldset className="field">
           <legend>Split</legend>
           <div className="radio-row">
-            {(Object.keys(SPLIT_LABELS) as SplitType[]).map((type) => (
+            {SPLIT_TYPES.map((type) => (
               <label key={type} className="inline-label">
                 <input
                   type="radio"

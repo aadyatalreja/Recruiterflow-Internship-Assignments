@@ -2,8 +2,8 @@ import { formatINR, parsePercentToBasisPoints, parseRupees, type ParseResult } f
 import { isCategory, type Expense, type Paise, type Split, type SplitType } from './types'
 
 export const MAX_DESCRIPTION_LENGTH = 60
-/** ₹1,00,000 */
-export const MAX_AMOUNT: Paise = 10000000
+/** ₹10,00,000 (ten lakh) */
+export const MAX_AMOUNT: Paise = 100000000
 const FULL_PERCENT_BASIS_POINTS = 10000
 
 /** Raw form state: everything is still a string exactly as typed. */

@@ -1,3 +1,4 @@
+import { isExpense } from '../domain/storedData'
 import type { Expense } from '../domain/types'
 import { SAMPLE_TRIP_DATA } from './expensesSlice'
 
@@ -5,7 +6,8 @@ export const STORAGE_KEY = 'trip-splitter:expenses'
 
 /**
  * Reads persisted expenses, falling back to the sample data when nothing is stored,
- * the stored value is not valid JSON, or localStorage itself is unavailable.
+ * the stored value is not valid JSON, any expense in it has the wrong shape, or
+ * localStorage itself is unavailable.
  * Only expenses are persisted; members always come from the sample data.
  */
 export function loadExpenses(): Expense[] {
@@ -13,7 +15,8 @@ export function loadExpenses(): Expense[] {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw === null) return SAMPLE_TRIP_DATA.expenses
     const parsed: unknown = JSON.parse(raw)
-    return Array.isArray(parsed) ? (parsed as Expense[]) : SAMPLE_TRIP_DATA.expenses
+    // All-or-nothing: silently dropping bad entries would change balances without telling anyone.
+    return Array.isArray(parsed) && parsed.every(isExpense) ? parsed : SAMPLE_TRIP_DATA.expenses
   } catch {
     return SAMPLE_TRIP_DATA.expenses
   }

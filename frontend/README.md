@@ -26,7 +26,7 @@ Data starts from `src/data/sample-data.json` and is saved to `localStorage`. Cle
 
 ## Three decisions
 
-**1. Persistence lives in a store subscription.** `store/persistence.ts` loads expenses once at startup (falling back to the sample data if nothing is stored or the JSON is corrupt) and subscribes to the store to write them back after every change. Components never touch `localStorage`, so no screen can forget to save, and the reducers stay pure and easy to test.
+**1. Persistence lives in a store subscription.** `store/persistence.ts` loads expenses once at startup (falling back to the sample data if nothing is stored, the JSON is corrupt or any expense has the wrong shape) and subscribes to the store to write them back after every change. Components never touch `localStorage`, so no screen can forget to save, and the reducers stay pure and easy to test.
 
 **2. Money is integer paise, and every split adds up exactly.** Amounts are parsed from strings with string maths (`parseRupees`), never `parseFloat`, and percentages become integer basis points, so 33.33 + 33.33 + 33.34 is exactly 10000. When a split doesn't divide evenly, the leftover paise are assigned deterministically. An equal split gives one extra paisa each to the first members in the list (₹100 / 3 = 33.34 + 33.33 + 33.33). A percent split uses the largest-remainder method. Each expense's shares therefore sum to its amount, and all balances sum to zero.
 
@@ -37,7 +37,7 @@ Data starts from `src/data/sample-data.json` and is saved to `localStorage`. Cle
 - Edit an expense, reusing the same form and validation.
 - A settle-up view that suggests the fewest payments needed to clear all balances.
 - Replace `window.confirm` with an accessible dialog, plus an undo toast after deleting.
-- Validate the shape of data loaded from `localStorage`, not just that it is an array.
+- Tell the user when saved data couldn't be read, instead of silently falling back.
 - Component tests for the Expenses page (filter, totals, delete) and one end-to-end test of the add → list → delete flow.
 
 ## How I used AI tools
