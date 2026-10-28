@@ -22,3 +22,18 @@ test('locked out user sees an error', async ({ page }) => {
   // Matches "Epic sadface: Sorry, this user has been locked out." on its visible text.
   await expect(page.getByText(/locked out/i)).toBeVisible()
 })
+
+test('logging out from the side menu returns to the login page', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByTestId('username').fill('standard_user')
+  await page.getByTestId('password').fill('secret_sauce')
+  await page.getByTestId('login-button').click()
+  await expect(page.getByTestId('title')).toHaveText('Products')
+
+  await page.getByRole('button', { name: 'Open Menu' }).click()
+  await page.getByRole('button', { name: 'Logout' }).click()
+
+  await expect(page).toHaveURL('/')
+  await expect(page.getByTestId('login-button')).toBeVisible()
+})
