@@ -449,3 +449,88 @@ input[type='text']:focus-visible, input[type='date']:focus-visible, select:focus
 }
 .theme-toggle:hover { color: var(--text); }
 .theme-toggle svg { width: 1.1rem; height: 1.1rem; }
+
+/* ------------------------------------------------------------------------------------------
+   Animated background + glassmorphism.
+   The LiquidEther canvas sits fixed behind the app. Every block of text sits on a frosted
+   glass panel: translucent fill, background blur, a light edge and a soft shadow. Panels
+   nested inside a panel (cards in a section) use a lighter fill and no extra blur.
+   ------------------------------------------------------------------------------------------ */
+:root {
+  --glass-bg: rgb(255 255 255 / 0.5);
+  --glass-bg-strong: rgb(255 255 255 / 0.8);
+  --glass-inner: rgb(255 255 255 / 0.5);
+  --glass-border: rgb(255 255 255 / 0.75);
+  --glass-shadow: 0 8px 32px rgb(30 41 99 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.6);
+  --glass-blur: blur(14px) saturate(1.6);
+}
+:root[data-theme='dark'] {
+  --glass-bg: rgb(17 21 32 / 0.38);
+  --glass-bg-strong: rgb(22 27 40 / 0.78);
+  --glass-inner: rgb(255 255 255 / 0.045);
+  --glass-border: rgb(255 255 255 / 0.1);
+  --glass-shadow: 0 8px 32px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+body {
+  background:
+    radial-gradient(60rem 40rem at 10% -10%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 70%),
+    radial-gradient(50rem 35rem at 100% 110%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+.app-background { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.app-content { position: relative; z-index: 1; min-height: 100vh; }
+
+.navbar,
+.page-header,
+.card,
+.section,
+.flash {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.navbar { border-width: 0 0 1px; }
+
+.page-header { padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); }
+.section { padding: 1.25rem; border-radius: var(--radius-lg); }
+
+/* Cards inside a section panel: one level of frosting is enough. */
+.section .card {
+  background: var(--glass-inner);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.flash {
+  background: color-mix(in srgb, var(--success-soft) 75%, transparent);
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
+}
+
+.navbar-links,
+.segmented,
+.balance-bar,
+.form-actions,
+.expense-table th { background: var(--glass-inner); }
+.navbar-links a.active,
+.segment input:checked + span { background: var(--glass-bg-strong); }
+
+button:not(.button-primary):not(.button-danger),
+.button:not(.button-primary),
+.filter-option span,
+.member-chip,
+input[type='text'],
+input[type='date'],
+select { background: var(--glass-bg-strong); }
+.member-chip:has(input:checked) { background: color-mix(in srgb, var(--primary-soft) 85%, transparent); }
+.expense-table td, .table-toolbar, .form-section + .form-section, .form-actions { border-color: var(--glass-border); }
+
+/* Browsers without backdrop-filter get solid panels, so text never sits on moving fibers. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .navbar, .page-header, .card, .section { background: var(--surface); }
+}

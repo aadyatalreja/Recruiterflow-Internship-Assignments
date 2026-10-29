@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom'
 import { BrandMark } from './Icons'
 import ThemeToggle from './ThemeToggle'
+import type { Theme } from '../theme'
 
-export default function Navbar() {
+export default function Navbar({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
   return (
     <header className="navbar">
       <div className="navbar-inner">
@@ -24,7 +25,7 @@ export default function Navbar() {
               </li>
             </ul>
           </nav>
-          <ThemeToggle />
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
       </div>
     </header>
