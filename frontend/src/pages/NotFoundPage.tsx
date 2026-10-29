@@ -6,8 +6,8 @@ export default function NotFoundPage() {
     <div className="not-found-page">
       <div className="card not-found">
         <Neon404 />
-        <h1>This page doesn’t exist</h1>
-        <p>The link may be broken, or the page may have moved.</p>
+        <h1>Page not found</h1>
+        <p>This page doesn’t exist. The link may be broken, or the page may have moved.</p>
         <SpecularButton
           to="/"
           size="md"

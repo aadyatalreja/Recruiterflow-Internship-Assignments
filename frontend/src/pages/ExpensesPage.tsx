@@ -3,7 +3,6 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Avatar from '../components/Avatar'
 import { CATEGORY_STYLE } from '../components/categoryStyle'
 import GlassIcon, { type GlassIconColor } from '../components/GlassIcon'
-import HoldButton from '../components/HoldButton/HoldButton'
 import PageWindow from '../components/PageWindow'
 import PillFilter from '../components/PillFilter/PillFilter'
 import SpecularButton from '../components/SpecularButton/SpecularButton'
@@ -133,8 +132,11 @@ export default function ExpensesPage() {
     setSearchParams(isCategory(value) ? { category: value } : {}, { replace: true })
   }
 
-  // Holding the button down is the confirmation, so there is no extra dialog.
   function handleDelete(expense: Expense) {
+    const confirmed = window.confirm(
+      `Delete “${expense.description}” (${formatINR(expense.amount)})? This can't be undone.`,
+    )
+    if (!confirmed) return
     dispatch(deleteExpense(expense.id))
     setMessage(`Deleted “${expense.description}”.`)
     expensesHeading.current?.focus()
@@ -290,23 +292,15 @@ export default function ExpensesPage() {
                           {describeSplit(e.split)}
                         </td>
                         <td className="actions">
-                          <HoldButton
-                            ariaLabel={`Delete ${e.description}`}
-                            title="Press and hold to delete"
-                            icon={<TrashIcon />}
-                            doneIcon={<TrashIcon />}
-                            backgroundColor="var(--danger-soft)"
-                            fillColor="var(--danger-fill)"
-                            textColor="var(--danger)"
-                            fillTextColor="#ffffff"
-                            size="sm"
-                            radius={10}
-                            holdTime={1200}
-                            resetAfter={0}
-                            onHold={() => handleDelete(e)}
+                          <button
+                            type="button"
+                            className="button-danger"
+                            aria-label={`Delete ${e.description}`}
+                            onClick={() => handleDelete(e)}
                           >
+                            <TrashIcon />
                             Delete
-                          </HoldButton>
+                          </button>
                         </td>
                       </tr>
                     ))}

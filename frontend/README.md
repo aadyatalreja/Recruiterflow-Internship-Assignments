@@ -16,13 +16,15 @@ npm run build      # type-check and production build
 
 Data starts from `src/data/sample-data.json` and is saved to `localStorage`. Clear the `trip-splitter:expenses` key to reset.
 
+The animated background, balance icons and Add expense button are adapted from [React Bits](https://reactbits.dev) and ported to strict TypeScript; the dropdown and category filter borrow its styling.
+
 ### Unfinished
 
 - Expenses can be added and deleted, not edited.
 - Members are fixed to the sample data.
 - There is no "settle up" view suggesting who should pay whom.
-- Deleting has no undo: holding the button down is the only confirmation.
-- The Expenses page has no component tests yet.
+- Delete confirms with the browser's native dialog.
+- The Expenses page's component tests cover deleting only, not the filter or totals.
 
 ## Three decisions
 
@@ -36,8 +38,8 @@ Data starts from `src/data/sample-data.json` and is saved to `localStorage`. Cle
 
 - Edit an expense, reusing the same form and validation.
 - A settle-up view that suggests the fewest payments needed to clear all balances.
-- An undo toast after deleting.
+- Replace `window.confirm` with an accessible dialog, plus an undo toast after deleting.
 - Tell the user when saved data couldn't be read, instead of silently falling back.
-- Component tests for the Expenses page (filter, totals, delete) and one end-to-end test of the add → list → delete flow.
+- Component tests for the Expenses page's filter and totals, and one end-to-end test of the add → list → delete flow.
 
 ## How I used AI tools

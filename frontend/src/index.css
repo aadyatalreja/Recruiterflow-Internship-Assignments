@@ -30,8 +30,6 @@
   --success-soft: #e7f7ef;
   --danger: #be123c;
   --danger-soft: #fdecef;
-  /* Solid red behind white text, e.g. the hold-to-delete fill. */
-  --danger-fill: #be123c;
 
   --radius-sm: 0.5rem;
   --radius: 0.75rem;
@@ -61,7 +59,6 @@
   --success-soft: #11291f;
   --danger: #fb7185;
   --danger-soft: #331820;
-  --danger-fill: #e11d48;
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow: 0 1px 3px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.25);
@@ -190,6 +187,13 @@ button, .button {
 button:hover, .button:hover { background: var(--surface-muted); }
 .button-primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
 .button-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+/* Delete: a soft red pill, quiet until hovered. */
+.button-danger {
+  min-height: 2rem; padding: 0.3rem 0.7rem; font-size: 0.85rem;
+  border-color: transparent; border-radius: 0.625rem;
+  background: var(--danger-soft); color: var(--danger);
+}
+.button-danger:hover { background: color-mix(in srgb, var(--danger) 16%, var(--danger-soft)); }
 .button svg, button svg { width: 1rem; height: 1rem; flex: none; }
 
 .flash {
@@ -350,10 +354,8 @@ button:hover, .button:hover { background: var(--surface-muted); }
 .expense-table td:first-child { white-space: nowrap; color: var(--text-muted); }
 .expense-table .split { color: var(--text-muted); }
 .expense-table .actions { width: 1%; text-align: right; }
-/* A compact hold-to-delete button, so the full table still fits on a 1024px-wide screen. */
+/* A little less space before the Delete button, so the full table fits on a 1024px-wide screen. */
 .expense-table .actions { padding-left: 0.5rem; }
-.expense-table .hold-button { padding: 0 10px; }
-.expense-table .hold-button__label > span { gap: 6px; }
 
 .empty-state { display: grid; justify-items: center; gap: 0.5rem; padding: 2.5rem 1.25rem; text-align: center; }
 /* Only the large illustration, not icons inside the empty state's buttons. */
@@ -573,6 +575,8 @@ input[type='text']:focus-visible, input[type='date']:focus-visible, select:focus
   .form-actions { padding: 1rem 1.15rem; }
   .form-actions > * { flex: 1; }
   .share-row { grid-template-columns: auto minmax(0, 1fr) minmax(6rem, 8rem); }
+  /* The filter's label goes on its own line so the options can use the full width. */
+  .filter legend { float: none; padding: 0 0 0.5rem; }
   .page-header > .button,
   .page-header > .specular-button { width: 100%; }
 }
@@ -682,7 +686,7 @@ body {
 .navbar-links a.active,
 .segment input:checked + span { background: var(--glass-bg-strong); }
 
-button:not(.button-primary):not(.hold-button),
+button:not(.button-primary):not(.button-danger),
 .button:not(.button-primary),
 .member-chip,
 input[type='text'],
@@ -795,7 +799,7 @@ select { background: var(--glass-bg-strong); }
 .page-window .form-actions,
 .page-window .expense-table th { background: var(--inner-glass); }
 .page-window .segment input:checked + span { background: var(--inner-glass-strong); box-shadow: var(--inner-glass-shadow); }
-.page-window button:not(.button-primary):not(.hold-button),
+.page-window button:not(.button-primary):not(.button-danger),
 .page-window .button:not(.button-primary),
 .page-window .page-window .member-chip,
 .page-window input[type='text'],
