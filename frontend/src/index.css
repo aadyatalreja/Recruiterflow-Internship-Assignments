@@ -1,9 +1,11 @@
 /* ------------------------------------------------------------------------------------------
    Design tokens. Every colour, radius and shadow below comes from here, so light and dark
    themes are one set of overrides. Text/background pairs meet WCAG AA contrast.
+   The theme is chosen by data-theme on <html> (set by src/theme.ts and index.html).
    ------------------------------------------------------------------------------------------ */
 :root {
-  color-scheme: light dark;
+  /* Native controls (date picker, select menus) follow the theme too. */
+  color-scheme: light;
 
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
@@ -42,38 +44,38 @@
   --tone-6-bg: #f3e8ff; --tone-6-fg: #6b21a8;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1017;
-    --surface: #161b25;
-    --surface-muted: #1d2330;
-    --border: #2a3140;
-    --border-strong: #3a4357;
-    --text: #e8ebf2;
-    --text-muted: #9aa3b5;
+:root[data-theme='dark'] {
+  color-scheme: dark;
 
-    --primary: #818cf8;
-    --primary-hover: #a5b4fc;
-    --primary-soft: #232a4a;
-    --on-primary: #0d1017;
-    --focus: #a5b4fc;
+  --bg: #0d1017;
+  --surface: #161b25;
+  --surface-muted: #1d2330;
+  --border: #2a3140;
+  --border-strong: #3a4357;
+  --text: #e8ebf2;
+  --text-muted: #9aa3b5;
 
-    --success: #34d399;
-    --success-soft: #11291f;
-    --danger: #fb7185;
-    --danger-soft: #331820;
-    --neutral-soft: #222836;
+  --primary: #818cf8;
+  --primary-hover: #a5b4fc;
+  --primary-soft: #232a4a;
+  --on-primary: #0d1017;
+  --focus: #a5b4fc;
 
-    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow: 0 1px 3px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.25);
+  --success: #34d399;
+  --success-soft: #11291f;
+  --danger: #fb7185;
+  --danger-soft: #331820;
+  --neutral-soft: #222836;
 
-    --tone-1-bg: #272f5c; --tone-1-fg: #c7d2fe;
-    --tone-2-bg: #173826; --tone-2-fg: #bbf7d0;
-    --tone-3-bg: #3d2f12; --tone-3-fg: #fde68a;
-    --tone-4-bg: #3f1a2e; --tone-4-fg: #fbcfe8;
-    --tone-5-bg: #11304a; --tone-5-fg: #bae6fd;
-    --tone-6-bg: #31204a; --tone-6-fg: #e9d5ff;
-  }
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.25);
+
+  --tone-1-bg: #272f5c; --tone-1-fg: #c7d2fe;
+  --tone-2-bg: #173826; --tone-2-fg: #bbf7d0;
+  --tone-3-bg: #3d2f12; --tone-3-fg: #fde68a;
+  --tone-4-bg: #3f1a2e; --tone-4-fg: #fbcfe8;
+  --tone-5-bg: #11304a; --tone-5-fg: #bae6fd;
+  --tone-6-bg: #31204a; --tone-6-fg: #e9d5ff;
 }
 
 /* ------------------------------------------------------------------------------------------
@@ -438,3 +440,12 @@ input[type='text']:focus-visible, input[type='date']:focus-visible, select:focus
   * { transition: none !important; }
 }
 .section-note { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+
+/* Theme toggle in the navbar: an icon button showing the theme it switches to. */
+.navbar-actions { display: flex; align-items: center; gap: 0.5rem; }
+.theme-toggle {
+  min-height: 2.25rem; width: 2.25rem; padding: 0; border-radius: 999px;
+  border-color: var(--border); color: var(--text-muted);
+}
+.theme-toggle:hover { color: var(--text); }
+.theme-toggle svg { width: 1.1rem; height: 1.1rem; }

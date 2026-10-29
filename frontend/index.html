@@ -16,6 +16,18 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
     />
     <title>Trip Splitter</title>
+    <!-- Apply the theme before the page paints, so it never flashes light then dark.
+         Same rule as initialTheme() in src/theme.ts: the saved choice, else the device setting. -->
+    <script>
+      try {
+        var saved = localStorage.getItem('trip-splitter:theme')
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.dataset.theme =
+          saved === 'light' || saved === 'dark' ? saved : dark ? 'dark' : 'light'
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light'
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
