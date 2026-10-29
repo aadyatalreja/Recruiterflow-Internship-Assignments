@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Avatar from '../components/Avatar'
+import BalanceBreakdown from '../components/BalanceBreakdown'
 import { CATEGORY_STYLE } from '../components/categoryStyle'
 import GlassIcon, { type GlassIconColor } from '../components/GlassIcon'
 import PageWindow from '../components/PageWindow'
@@ -15,7 +16,7 @@ import {
   ReceiptIcon,
   TrashIcon,
 } from '../components/Icons'
-import { balanceStatus, computeBalances, type BalanceStatus } from '../domain/balances'
+import { balanceBreakdown, balanceStatus, computeBalances, type BalanceStatus } from '../domain/balances'
 import { formatDate } from '../domain/dates'
 import { formatINR } from '../domain/money'
 import { describeSplit } from '../domain/split'
@@ -32,6 +33,7 @@ function addedFrom(state: unknown): string | null {
 }
 
 const FILTER_OPTIONS = ['All', ...CATEGORIES] as const
+const BREAKDOWN_ID = 'balance-breakdown'
 
 function describeBalance(status: BalanceStatus): string {
   switch (status.kind) {
@@ -128,6 +130,21 @@ export default function ExpensesPage() {
   // Scales the balance bars: the largest balance, either way, fills its bar.
   const largestBalance = Math.max(1, ...members.map((m) => Math.abs(balances[m.id] ?? 0)))
 
+  // Whose balance breakdown is open, if anyone's. Purely a view choice, so it stays local state.
+  const [openMemberId, setOpenMemberId] = useState<string | null>(null)
+  const openMember = members.find((m) => m.id === openMemberId)
+  const breakdown = useMemo(
+    () => (openMemberId === null ? null : balanceBreakdown(openMemberId, sortNewestFirst(expenses))),
+    [openMemberId, expenses],
+  )
+  const balanceButtons = useRef(new Map<string, HTMLButtonElement | null>())
+
+  /** Closes the breakdown and returns focus to the name that opened it. */
+  function closeBreakdown() {
+    if (openMemberId !== null) balanceButtons.current.get(openMemberId)?.focus()
+    setOpenMemberId(null)
+  }
+
   function handleCategoryChange(value: string) {
     setSearchParams(isCategory(value) ? { category: value } : {}, { replace: true })
   }
@@ -176,30 +193,59 @@ export default function ExpensesPage() {
         </div>
       </dl>
 
-      <section aria-labelledby="balances-heading" className="section">
+      <section
+        aria-labelledby="balances-heading"
+        className="section"
+        // Escape closes the breakdown from the name button or from inside the panel.
+        onKeyDown={(event) => {
+          if (event.key === 'Escape' && openMemberId !== null) closeBreakdown()
+        }}
+      >
         <div className="section-header">
           <h2 id="balances-heading">Balances</h2>
-          <p className="section-note">Across every expense, whatever the filter</p>
+          <p className="section-note">Across every expense, whatever the filter. Select a name to see how it adds up.</p>
         </div>
         <ul className="balance-list">
           {members.map((m, i) => {
             const balance = balances[m.id] ?? 0
             const status = balanceStatus(balance)
             const barWidth = `${(Math.abs(balance) / largestBalance) * 100}%`
+            const open = openMemberId === m.id
             return (
               <li key={m.id} className={`card balance balance-${status.kind}`}>
-                <GlassIcon {...BALANCE_ICONS[status.kind]} index={i} />
-                <div className="balance-body">
-                  <span className="balance-name">{m.name}</span>{' '}
-                  <span className="balance-status">{describeBalance(status)}</span>
-                  <span className="balance-bar" aria-hidden="true">
-                    <span style={{ width: barWidth }} />
+                {/* The whole card is a disclosure button for this member's breakdown below. */}
+                <button
+                  type="button"
+                  className="balance-button"
+                  aria-expanded={open}
+                  aria-controls={open ? BREAKDOWN_ID : undefined}
+                  onClick={() => setOpenMemberId(open ? null : m.id)}
+                  ref={(element) => {
+                    balanceButtons.current.set(m.id, element)
+                  }}
+                >
+                  <GlassIcon {...BALANCE_ICONS[status.kind]} index={i} />
+                  <span className="balance-body">
+                    <span className="balance-name">{m.name}</span>{' '}
+                    <span className="balance-status">{describeBalance(status)}</span>
+                    <span className="balance-bar" aria-hidden="true">
+                      <span style={{ width: barWidth }} />
+                    </span>
                   </span>
-                </div>
+                </button>
               </li>
             )
           })}
         </ul>
+
+        {openMember && breakdown && (
+          <BalanceBreakdown
+            id={BREAKDOWN_ID}
+            name={openMember.name}
+            breakdown={breakdown}
+            onClose={closeBreakdown}
+          />
+        )}
       </section>
 
       <section aria-labelledby="expenses-heading" className="section">

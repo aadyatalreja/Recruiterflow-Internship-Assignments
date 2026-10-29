@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
@@ -68,5 +68,41 @@ describe('ExpensesPage delete', () => {
     expect(screen.getAllByText('settled up')).toHaveLength(2)
     expect(screen.getByText('Deleted “Taxi”.')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'No expenses yet' })).toBeInTheDocument()
+  })
+})
+
+describe('ExpensesPage balance breakdown', () => {
+  it('opens a member’s breakdown from their name and closes it again', async () => {
+    const { user } = renderPage()
+    const asha = screen.getByRole('button', { name: /^Asha/ })
+    expect(asha).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(asha)
+
+    expect(asha).toHaveAttribute('aria-expanded', 'true')
+    const panel = screen.getByRole('region', { name: 'How Asha’s balance adds up' })
+    const row = within(panel).getByRole('row', { name: /Taxi/ })
+    expect(within(row).getByText('₹100.00')).toBeInTheDocument()
+    expect(within(row).getByText('₹50.00')).toBeInTheDocument()
+    expect(within(row).getByText('+₹50.00')).toBeInTheDocument()
+    expect(panel).toHaveTextContent('Paid ₹100.00 − share ₹50.00 = Asha gets back ₹50.00')
+
+    await user.click(within(panel).getByRole('button', { name: 'Close' }))
+
+    expect(screen.queryByRole('region', { name: /balance adds up/ })).not.toBeInTheDocument()
+    expect(asha).toHaveAttribute('aria-expanded', 'false')
+    expect(asha).toHaveFocus()
+  })
+
+  it('shows a member who only owes, and closes on Escape', async () => {
+    const { user } = renderPage()
+
+    await user.click(screen.getByRole('button', { name: /^Bala/ }))
+    const panel = screen.getByRole('region', { name: 'How Bala’s balance adds up' })
+    expect(panel).toHaveTextContent('Paid ₹0.00 − share ₹50.00 = Bala owes ₹50.00')
+    expect(within(panel).getByText('−₹50.00')).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('region', { name: /balance adds up/ })).not.toBeInTheDocument()
   })
 })

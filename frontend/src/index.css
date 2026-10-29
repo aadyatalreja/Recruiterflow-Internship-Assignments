@@ -253,7 +253,20 @@ button:hover, .button:hover { background: var(--surface-muted); }
   display: grid; grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr)); gap: 0.875rem;
   margin: 0; padding: 0; list-style: none;
 }
-.balance { display: flex; align-items: center; gap: 0.875rem; padding: 1rem; }
+.balance { padding: 0; }
+/* The whole card is a button that opens this member's breakdown. */
+.balance-button {
+  display: flex; align-items: center; justify-content: flex-start; gap: 0.875rem;
+  width: 100%; min-height: 0; padding: 1rem;
+  border: 0; border-radius: inherit; background: none;
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.balance-button:hover { background: color-mix(in srgb, var(--primary) 6%, transparent); }
+.balance-button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.balance-list .balance:has(.balance-button[aria-expanded='true']) {
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent);
+}
 .balance-body { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; flex: 1; }
 .balance-name { font-weight: 650; }
 .balance-status { font-size: 0.9rem; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -265,6 +278,46 @@ button:hover, .button:hover { background: var(--surface-muted); }
 .balance-bar > span { display: block; height: 100%; border-radius: inherit; }
 .balance-gets_back .balance-bar > span { background: var(--success); }
 .balance-owes .balance-bar > span { background: var(--danger); }
+
+/* One member's breakdown, opened from their balance card. */
+.breakdown { margin-top: 0.875rem; padding: 1.1rem 1.25rem; animation: breakdown-in 220ms ease-out; }
+.breakdown-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.5rem; }
+.breakdown-header h3 { margin: 0; font-size: 1rem; }
+.breakdown-close { min-height: 2rem; padding: 0.25rem 0.8rem; font-size: 0.85rem; }
+.breakdown-empty { margin: 0.5rem 0 0; color: var(--text-muted); }
+.breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.breakdown-table th, .breakdown-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border); text-align: left; }
+.breakdown-table thead th {
+  font-size: 0.72rem; font-weight: 650; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+}
+.breakdown-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.breakdown-table tbody th { font-weight: 600; }
+.breakdown-expense, .breakdown-date { display: block; }
+.breakdown-date { font-size: 0.78rem; font-weight: 500; color: var(--text-muted); }
+.breakdown-positive { color: var(--success); font-weight: 650; }
+.breakdown-negative { color: var(--danger); font-weight: 650; }
+.breakdown-zero { color: var(--text-muted); }
+.breakdown-sum { margin: 0.9rem 0 0; font-size: 0.9rem; color: var(--text-muted); }
+.breakdown-sum strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.breakdown-sum strong.breakdown-positive { color: var(--success); }
+.breakdown-sum strong.breakdown-negative { color: var(--danger); }
+.page-window .breakdown-table th, .page-window .breakdown-table td { border-color: var(--inner-glass-border); }
+
+@keyframes breakdown-in { from { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .breakdown { animation: none; } }
+
+/* Phones: each expense becomes a block, with one "label … amount" line per value. */
+@media (max-width: 560px) {
+  .breakdown { padding: 1rem; }
+  .breakdown-header { align-items: flex-start; }
+  .breakdown-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .breakdown-table tr { display: block; padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
+  .page-window .breakdown-table tr { border-color: var(--inner-glass-border); }
+  .breakdown-table th, .breakdown-table td { display: block; padding: 0; border: 0; }
+  .breakdown-table tbody th { margin-bottom: 0.3rem; }
+  .breakdown-table td { display: flex; justify-content: space-between; gap: 1rem; padding: 0.1rem 0; }
+  .breakdown-table td::before { content: attr(data-label); font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
+}
 
 /* Balance icon: a frosted glass tile over a tilted coloured card, after React Bits' GlassIcons.
    The card swings out when the page loads (staggered per member) and a little further on hover. */
@@ -686,7 +739,7 @@ body {
 .navbar-links a.active,
 .segment input:checked + span { background: var(--glass-bg-strong); }
 
-button:not(.button-primary):not(.button-danger),
+button:not(.button-primary):not(.button-danger):not(.balance-button),
 .button:not(.button-primary),
 .member-chip,
 input[type='text'],
@@ -799,7 +852,7 @@ select { background: var(--glass-bg-strong); }
 .page-window .form-actions,
 .page-window .expense-table th { background: var(--inner-glass); }
 .page-window .segment input:checked + span { background: var(--inner-glass-strong); box-shadow: var(--inner-glass-shadow); }
-.page-window button:not(.button-primary):not(.button-danger),
+.page-window button:not(.button-primary):not(.button-danger):not(.balance-button),
 .page-window .button:not(.button-primary),
 .page-window .page-window .member-chip,
 .page-window input[type='text'],

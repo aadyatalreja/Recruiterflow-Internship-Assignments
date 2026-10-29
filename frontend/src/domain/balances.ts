@@ -34,3 +34,38 @@ export function balanceStatus(balance: Paise): BalanceStatus {
   if (balance < 0) return { kind: 'owes', amount: -balance }
   return { kind: 'settled' }
 }
+
+/** One expense's effect on a member's balance. */
+export interface BalanceLine {
+  expense: Expense
+  /** The full amount if this member paid for it, otherwise 0. */
+  paid: Paise
+  /** This member's share of it, or 0 if they weren't part of the split. */
+  share: Paise
+}
+
+export interface BalanceBreakdown {
+  /** Only the expenses this member paid for or shares in, in the order given. */
+  lines: BalanceLine[]
+  totalPaid: Paise
+  totalShare: Paise
+  /** totalPaid − totalShare: always the same number computeBalances gives this member. */
+  balance: Paise
+}
+
+/** How one member's balance is made up, expense by expense. */
+export function balanceBreakdown(memberId: string, expenses: readonly Expense[]): BalanceBreakdown {
+  const lines: BalanceLine[] = []
+  let totalPaid = 0
+  let totalShare = 0
+
+  for (const expense of expenses) {
+    const paid = expense.paidBy === memberId ? expense.amount : 0
+    const share = sharesOf(expense)[memberId] ?? 0
+    if (paid === 0 && share === 0) continue
+    lines.push({ expense, paid, share })
+    totalPaid += paid
+    totalShare += share
+  }
+  return { lines, totalPaid, totalShare, balance: totalPaid - totalShare }
+}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { balanceStatus, computeBalances } from './balances'
+import { balanceBreakdown, balanceStatus, computeBalances } from './balances'
+import { SAMPLE_TRIP_DATA } from '../store/expensesSlice'
 import type { Expense, Member } from './types'
 
 const members: Member[] = [
@@ -60,5 +61,38 @@ describe('balanceStatus', () => {
     expect(balanceStatus(250)).toEqual({ kind: 'gets_back', amount: 250 })
     expect(balanceStatus(-250)).toEqual({ kind: 'owes', amount: 250 })
     expect(balanceStatus(0)).toEqual({ kind: 'settled' })
+  })
+})
+
+describe('balanceBreakdown', () => {
+  const expenses: Expense[] = [
+    { ...base, id: '1', description: 'Dinner', amount: 9000, paidBy: 'a',
+      split: { type: 'equal', memberIds: ['a', 'b', 'c'] } },
+    { ...base, id: '2', description: 'Groceries', amount: 1000, paidBy: 'b',
+      split: { type: 'equal', memberIds: ['a', 'c'] } },
+    { ...base, id: '3', description: 'Taxi', amount: 500, paidBy: 'c',
+      split: { type: 'equal', memberIds: ['b', 'c'] } },
+  ]
+
+  it('lists what the member paid and their share of each expense they are part of', () => {
+    const breakdown = balanceBreakdown('a', expenses)
+    expect(breakdown.lines.map((l) => [l.expense.id, l.paid, l.share])).toEqual([
+      ['1', 9000, 3000],
+      ['2', 0, 500],
+    ])
+    expect(breakdown).toMatchObject({ totalPaid: 9000, totalShare: 3500, balance: 5500 })
+  })
+
+  it('includes an expense the member paid for but is not part of', () => {
+    const line = balanceBreakdown('b', expenses).lines.find((l) => l.expense.id === '2')
+    expect(line).toMatchObject({ paid: 1000, share: 0 })
+  })
+
+  it('agrees with computeBalances for every member of the sample trip', () => {
+    const { members, expenses: sample } = SAMPLE_TRIP_DATA
+    const balances = computeBalances(members, sample)
+    for (const member of members) {
+      expect(balanceBreakdown(member.id, sample).balance).toBe(balances[member.id])
+    }
   })
 })
