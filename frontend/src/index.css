@@ -27,6 +27,8 @@
   --success-soft: #e7f7ef;
   --danger: #be123c;
   --danger-soft: #fdecef;
+  /* Solid red behind white text, e.g. the hold-to-delete fill. */
+  --danger-fill: #be123c;
   --neutral-soft: #eef0f4;
 
   --radius-sm: 0.5rem;
@@ -65,6 +67,7 @@
   --success-soft: #11291f;
   --danger: #fb7185;
   --danger-soft: #331820;
+  --danger-fill: #e11d48;
   --neutral-soft: #222836;
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
@@ -188,11 +191,6 @@ button, .button {
 button:hover, .button:hover { background: var(--surface-muted); }
 .button-primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
 .button-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-.button-danger {
-  min-height: 2rem; padding: 0.3rem 0.65rem; font-size: 0.85rem;
-  border-color: transparent; background: transparent; color: var(--danger);
-}
-.button-danger:hover { background: var(--danger-soft); }
 .button svg, button svg { width: 1rem; height: 1rem; flex: none; }
 
 .flash {
@@ -262,6 +260,67 @@ button:hover, .button:hover { background: var(--surface-muted); }
 .balance-gets_back .balance-bar > span { background: var(--success); }
 .balance-owes .balance-bar > span { background: var(--danger); }
 
+/* Balance icon: a frosted glass tile over a tilted coloured card, after React Bits' GlassIcons.
+   The card swings out when the page loads (staggered per member) and a little further on hover. */
+.glass-icon {
+  --glass-icon-size: 2.9rem;
+  --glass-icon-tilt: 24deg;
+  position: relative; flex: none; isolation: isolate;
+  width: var(--glass-icon-size); height: var(--glass-icon-size);
+  /* Room for the card that peeks out above the glass. */
+  margin: 0.35rem 0.15rem 0 0;
+}
+.glass-icon-plate,
+.glass-icon-glass { position: absolute; inset: 0; border-radius: 34%; }
+.glass-icon-plate {
+  z-index: 0;
+  background: var(--glass-icon-plate);
+  transform: rotate(var(--glass-icon-tilt));
+  transform-origin: 100% 100%;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: glass-icon-swing 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--glass-icon-index) * 70ms + 120ms);
+}
+.glass-icon-glass {
+  z-index: 1;
+  background:
+    linear-gradient(150deg, rgb(255 255 255 / 0.45), rgb(255 255 255 / 0) 42%),
+    rgb(223 223 223 / 0.2);
+  /* The light catching the edge: bright top-left rim, softer shade bottom-right. */
+  box-shadow:
+    inset 1.5px 1.5px 0 rgb(255 255 255 / 0.6),
+    inset -1px -1px 0 rgb(255 255 255 / 0.18),
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 10px 20px -12px rgb(0 0 0 / 0.45);
+  -webkit-backdrop-filter: blur(4px) saturate(1.4);
+  backdrop-filter: blur(4px) saturate(1.4);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.glass-icon-glyph {
+  position: absolute; inset: 0; z-index: 2;
+  display: grid; place-items: center;
+  color: #fff;
+  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.28));
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.glass-icon-glyph > svg { width: 42%; height: 42%; stroke-width: 2.4; }
+.balance:hover .glass-icon-plate { transform: rotate(calc(var(--glass-icon-tilt) + 10deg)); }
+.balance:hover .glass-icon-glass,
+.balance:hover .glass-icon-glyph { transform: translateY(-2px) scale(0.96); }
+
+@keyframes glass-icon-swing {
+  from { transform: rotate(0deg); opacity: 0; }
+  30% { opacity: 1; }
+  to { transform: rotate(var(--glass-icon-tilt)); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-icon-plate { animation: none; }
+  .glass-icon-plate,
+  .glass-icon-glass,
+  .glass-icon-glyph { transition: none; }
+}
+
 /* ------------------------------------------------------------------------------------------
    Expenses page: filter, table and empty states
    ------------------------------------------------------------------------------------------ */
@@ -299,6 +358,10 @@ button:hover, .button:hover { background: var(--surface-muted); }
 .expense-table td:first-child { white-space: nowrap; color: var(--text-muted); }
 .expense-table .split { color: var(--text-muted); }
 .expense-table .actions { width: 1%; text-align: right; }
+/* A compact hold-to-delete button, so the full table still fits on a 1024px-wide screen. */
+.expense-table .actions { padding-left: 0.5rem; }
+.expense-table .hold-button { padding: 0 10px; }
+.expense-table .hold-button__label > span { gap: 6px; }
 
 .empty-state { display: grid; justify-items: center; gap: 0.5rem; padding: 2.5rem 1.25rem; text-align: center; }
 .empty-state svg { width: 4.5rem; height: 4.5rem; margin-bottom: 0.5rem; color: var(--primary); }
@@ -520,7 +583,7 @@ body {
 .navbar-links a.active,
 .segment input:checked + span { background: var(--glass-bg-strong); }
 
-button:not(.button-primary):not(.button-danger),
+button:not(.button-primary):not(.hold-button),
 .button:not(.button-primary),
 .filter-option span,
 .member-chip,
@@ -533,4 +596,125 @@ select { background: var(--glass-bg-strong); }
 /* Browsers without backdrop-filter get solid panels, so text never sits on moving fibers. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .navbar, .page-header, .card, .section { background: var(--surface); }
+}
+
+/* ------------------------------------------------------------------------------------------
+   Page window: one near-opaque panel per page, with a small title bar (like an app window),
+   so the animated background only shows around the edges and never behind the content.
+   Inside it, the frosted-glass panels become flat surfaces.
+   ------------------------------------------------------------------------------------------ */
+:root {
+  --window-bg: rgb(246 247 251 / 0.94);
+  --window-body: #ffffff;
+  --window-card: #f7f8fc;
+  --window-border: rgb(15 23 42 / 0.08);
+  --window-shadow: 0 24px 60px rgb(30 41 99 / 0.18), 0 2px 6px rgb(30 41 99 / 0.06);
+}
+:root[data-theme='dark'] {
+  --window-bg: rgb(26 29 40 / 0.94);
+  --window-body: #13161f;
+  --window-card: #1a1e2a;
+  --window-border: rgb(255 255 255 / 0.07);
+  --window-shadow: 0 24px 60px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.3);
+}
+
+.page-window {
+  padding: 0 0.5rem 0.5rem;
+  border: 1px solid var(--window-border);
+  border-radius: 1.25rem;
+  background: var(--window-bg);
+  box-shadow: var(--window-shadow);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+.page-window-bar {
+  display: flex; align-items: center; justify-content: center;
+  height: 2.6rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.01em;
+}
+/* The window body is solid, with a few soft, static colour pools painted on it. They give the
+   glass panels inside something to frost, without the moving background behind the content. */
+.page-window-body {
+  padding: 1.5rem;
+  border: 1px solid var(--window-border);
+  border-radius: 0.95rem;
+  background:
+    radial-gradient(32rem 22rem at 0% 0%, color-mix(in srgb, var(--primary) var(--pool-1), transparent), transparent 70%),
+    radial-gradient(28rem 20rem at 100% 25%, color-mix(in srgb, #ec4899 var(--pool-2), transparent), transparent 70%),
+    radial-gradient(34rem 24rem at 35% 100%, color-mix(in srgb, #a855f7 var(--pool-3), transparent), transparent 70%),
+    var(--window-body);
+}
+
+/* Glass inside the window: translucent fill with a light sheen, frosted, with a bright top edge. */
+:root {
+  /* Strength of the window's colour pools; light mode needs more to show through white glass. */
+  --pool-1: 24%;
+  --pool-2: 18%;
+  --pool-3: 20%;
+  --inner-glass: rgb(255 255 255 / 0.42);
+  --inner-glass-strong: rgb(255 255 255 / 0.8);
+  --inner-glass-border: rgb(99 102 241 / 0.14);
+  --inner-glass-sheen: linear-gradient(135deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 55%);
+  --inner-glass-shadow: 0 6px 20px rgb(30 41 99 / 0.07), inset 0 1px 0 rgb(255 255 255 / 0.95);
+}
+:root[data-theme='dark'] {
+  --pool-1: 16%;
+  --pool-2: 11%;
+  --pool-3: 12%;
+  --inner-glass: rgb(255 255 255 / 0.045);
+  --inner-glass-strong: rgb(255 255 255 / 0.08);
+  --inner-glass-border: rgb(255 255 255 / 0.1);
+  --inner-glass-sheen: linear-gradient(135deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 55%);
+  --inner-glass-shadow: 0 6px 20px rgb(0 0 0 / 0.28), inset 0 1px 0 rgb(255 255 255 / 0.07);
+}
+
+.page-window .page-header {
+  padding: 0 0 1.25rem; border: 0; border-bottom: 1px solid var(--inner-glass-border);
+  border-radius: 0; background: none; box-shadow: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.page-window .section,
+.page-window .card,
+.page-window .flash {
+  background: var(--inner-glass-sheen), var(--inner-glass);
+  border: 1px solid var(--inner-glass-border);
+  box-shadow: var(--inner-glass-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  backdrop-filter: blur(14px) saturate(1.5);
+}
+/* Cards inside a glass section: same look, without stacking a second blur. */
+.page-window .section .card {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 12%, transparent);
+}
+.page-window .flash {
+  background: var(--inner-glass-sheen), color-mix(in srgb, var(--success-soft) 70%, transparent);
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
+}
+.page-window .segmented,
+.page-window .balance-bar,
+.page-window .form-actions,
+.page-window .expense-table th { background: var(--inner-glass); }
+.page-window .segment input:checked + span { background: var(--inner-glass-strong); box-shadow: var(--inner-glass-shadow); }
+.page-window button:not(.button-primary):not(.hold-button),
+.page-window .button:not(.button-primary),
+.page-window .filter-option span,
+.page-window .member-chip,
+.page-window input[type='text'],
+.page-window input[type='date'],
+.page-window select { background: var(--inner-glass-strong); }
+.page-window .member-chip:has(input:checked) { background: color-mix(in srgb, var(--primary-soft) 80%, transparent); }
+.page-window .expense-table td,
+.page-window .table-toolbar,
+.page-window .form-section + .form-section,
+.page-window .form-actions { border-color: var(--inner-glass-border); }
+.page-window .expense-form { max-width: none; }
+
+/* The navbar sits over the background too, so make it near-opaque as well. */
+.navbar { background: var(--window-bg); }
+
+@media (max-width: 560px) {
+  .page-window { padding: 0 0.3rem 0.3rem; border-radius: 1rem; }
+  .page-window-body { padding: 1rem; border-radius: 0.8rem; }
 }

@@ -72,3 +72,29 @@ export function BrandMark() {
     </svg>
   )
 }
+
+/** Money coming back to someone. */
+export function ArrowDownLeftIcon() {
+  return (
+    <svg {...common}>
+      <path d="M17 7 7 17M16 17H7V8" />
+    </svg>
+  )
+}
+
+/** Money someone still has to pay. */
+export function ArrowUpRightIcon() {
+  return (
+    <svg {...common}>
+      <path d="M7 17 17 7M8 7h9v9" />
+    </svg>
+  )
+}
+
+export function CheckIcon() {
+  return (
+    <svg {...common}>
+      <path d="m5 12 5 5 9-10" />
+    </svg>
+  )
+}

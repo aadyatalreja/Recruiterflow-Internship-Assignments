@@ -21,7 +21,7 @@ Data starts from `src/data/sample-data.json` and is saved to `localStorage`. Cle
 - Expenses can be added and deleted, not edited.
 - Members are fixed to the sample data.
 - There is no "settle up" view suggesting who should pay whom.
-- Delete confirms with the browser's native dialog.
+- Deleting has no undo: holding the button down is the only confirmation.
 - The Expenses page has no component tests yet.
 
 ## Three decisions
@@ -36,7 +36,7 @@ Data starts from `src/data/sample-data.json` and is saved to `localStorage`. Cle
 
 - Edit an expense, reusing the same form and validation.
 - A settle-up view that suggests the fewest payments needed to clear all balances.
-- Replace `window.confirm` with an accessible dialog, plus an undo toast after deleting.
+- An undo toast after deleting.
 - Tell the user when saved data couldn't be read, instead of silently falling back.
 - Component tests for the Expenses page (filter, totals, delete) and one end-to-end test of the add → list → delete flow.
 

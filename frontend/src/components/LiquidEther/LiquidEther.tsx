@@ -26,7 +26,11 @@ export interface LiquidEtherProps {
   bounceEdges?: boolean
   clickBurst?: boolean
   autoDemo?: boolean
+  /** Keep the automatic stirring running while the cursor is on the page, not only when idle. */
+  alwaysFlow?: boolean
   autoSpeed?: number
+  /** How far the automatic stirrer wanders from the centre, as a fraction of the size (0–0.5). */
+  autoRange?: number
   autoIntensity?: number
   autoResumeDelay?: number
   intro?: boolean
@@ -355,7 +359,9 @@ export default function LiquidEther({
   bounceEdges = false,
   clickBurst = true,
   autoDemo = true,
+  alwaysFlow = false,
   autoSpeed = 0.5,
+  autoRange = 0.41,
   autoIntensity = 2.2,
   autoResumeDelay = 1000,
   intro = true,
@@ -384,7 +390,9 @@ export default function LiquidEther({
     walls: bounceEdges,
     clickBurst,
     autoDemo,
+    alwaysFlow,
     autoSpeed: Math.max(0, autoSpeed),
+    autoRange: clamp(autoRange, 0, 0.5),
     autoIntensity: Math.max(0, autoIntensity),
     autoResumeDelay: Math.max(0, autoResumeDelay),
     intro,
@@ -640,11 +648,11 @@ export default function LiquidEther({
       })
     }
 
-    /** The automatic stirrer's path: a smooth wander around the middle of the screen. */
-    const wander = (t: number): Point => {
+    /** The automatic stirrer's path: a smooth wander around the centre, out to `range` of the size. */
+    const wander = (t: number, range: number): Point => {
       const x = 0.62 * Math.sin(t * 0.83 + 1.3) + 0.38 * Math.sin(t * 1.71 + 0.4)
       const y = 0.6 * Math.sin(t * 1.07 + 2.1) + 0.4 * Math.cos(t * 0.61 + 0.7)
-      return [(0.5 + 0.41 * x) * size.width, (0.5 + 0.41 * y) * size.height]
+      return [(0.5 + range * x) * size.width, (0.5 + range * y) * size.height]
     }
 
     /** The intro's path: a spiral sweeping out from the centre. */
@@ -679,7 +687,8 @@ export default function LiquidEther({
       const dt = clamp((now - last) / 1000 || 0, 0, 1 / 30)
       last = Math.max(last, now)
       const pace = Math.min(1, dt * 60)
-      const idle = now - lastInput > s.autoResumeDelay && !pointer.inside
+      // With alwaysFlow the stirring never pauses; the cursor adds its own strokes on top.
+      const idle = s.alwaysFlow || (now - lastInput > s.autoResumeDelay && !pointer.inside)
 
       if (opening.active && dt > 0) {
         const from = sweep(opening.time)
@@ -691,7 +700,7 @@ export default function LiquidEther({
       } else if (s.autoDemo && !reduced && idle && dt > 0) {
         auto.ramp = Math.min(1, auto.ramp + dt / 0.8)
         auto.phase += dt * s.autoSpeed * 1.6
-        const spot = wander(auto.phase)
+        const spot = wander(auto.phase, s.autoRange)
         if (auto.ready) {
           const gust = 0.3 + 0.7 * Math.pow(0.5 + 0.5 * Math.sin(auto.phase * 2.6), 2)
           const scale = (s.force / 20) * 0.45 * s.autoIntensity * auto.ramp * auto.ramp * gust * pace

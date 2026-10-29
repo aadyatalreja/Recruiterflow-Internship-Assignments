@@ -22,14 +22,22 @@ export default function App() {
         <LiquidEther
           colors={dark ? DARK_COLORS : LIGHT_COLORS}
           lightMode={!dark}
-          // Ink on white needs a little more strength to show through the frosted panels.
-          intensity={dark ? 1 : 1.4}
-          mouseForce={20}
-          cursorSize={100}
-          persistence={0.75}
+          // Colour strength follows flow speed, so the gentle ambient flow needs a brightness
+          // boost to be visible; ink on white needs a little more than glow on dark.
+          intensity={dark ? 1.5 : 1.8}
+          // The liquid always flows on its own; moving the cursor stirs it harder on top.
+          // The page window hides the middle of the screen, so the automatic stirrer roams out
+          // to the edges (autoRange 0.5) and the swirls linger longer (persistence 0.9) to stay
+          // visible around the window. Automatic stirring scales with mouseForce too, so
+          // autoIntensity is set relative to it: ambient strength = mouseForce / 20 x 2.4.
+          alwaysFlow
           autoDemo
-          autoSpeed={0.5}
-          autoIntensity={2.2}
+          autoSpeed={0.6}
+          autoRange={0.5}
+          autoIntensity={2.4}
+          mouseForce={40}
+          cursorSize={140}
+          persistence={0.9}
         />
       </div>
 

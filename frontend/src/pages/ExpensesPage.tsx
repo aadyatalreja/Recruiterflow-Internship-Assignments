@@ -1,7 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Avatar from '../components/Avatar'
-import { CheckCircleIcon, PlusIcon, ReceiptIcon, TrashIcon } from '../components/Icons'
+import GlassIcon, { type GlassIconColor } from '../components/GlassIcon'
+import HoldButton from '../components/HoldButton/HoldButton'
+import PageWindow from '../components/PageWindow'
+import {
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  PlusIcon,
+  ReceiptIcon,
+  TrashIcon,
+} from '../components/Icons'
 import { balanceStatus, computeBalances, type BalanceStatus } from '../domain/balances'
 import { formatINR } from '../domain/money'
 import { describeSplit } from '../domain/split'
@@ -28,6 +39,13 @@ function describeBalance(status: BalanceStatus): string {
     case 'settled':
       return 'settled up'
   }
+}
+
+/** Each balance's glass icon: green money in, red money out, grey when settled. */
+const BALANCE_ICONS: Record<BalanceStatus['kind'], { color: GlassIconColor; icon: ReactNode }> = {
+  gets_back: { color: 'green', icon: <ArrowDownLeftIcon /> },
+  owes: { color: 'red', icon: <ArrowUpRightIcon /> },
+  settled: { color: 'graphite', icon: <CheckIcon /> },
 }
 
 /** "2026-03-12" -> "12 Mar 2026", formatted from the parts so no time zone can shift the day. */
@@ -107,18 +125,15 @@ export default function ExpensesPage() {
     setSearchParams(isCategory(value) ? { category: value } : {}, { replace: true })
   }
 
+  // Holding the button down is the confirmation, so there is no extra dialog.
   function handleDelete(expense: Expense) {
-    const confirmed = window.confirm(
-      `Delete “${expense.description}” (${formatINR(expense.amount)})? This can't be undone.`,
-    )
-    if (!confirmed) return
     dispatch(deleteExpense(expense.id))
     setMessage(`Deleted “${expense.description}”.`)
     expensesHeading.current?.focus()
   }
 
   return (
-    <>
+    <PageWindow title="Expenses">
       <div className="page-header">
         <div>
           <h1>Expenses</h1>
@@ -166,7 +181,7 @@ export default function ExpensesPage() {
             const barWidth = `${(Math.abs(balance) / largestBalance) * 100}%`
             return (
               <li key={m.id} className={`card balance balance-${status.kind}`}>
-                <Avatar name={m.name} index={i} />
+                <GlassIcon {...BALANCE_ICONS[status.kind]} index={i} />
                 <div className="balance-body">
                   <span className="balance-name">{m.name}</span>{' '}
                   <span className="balance-status">{describeBalance(status)}</span>
@@ -280,15 +295,23 @@ export default function ExpensesPage() {
                           {describeSplit(e.split)}
                         </td>
                         <td className="actions">
-                          <button
-                            type="button"
-                            className="button-danger"
-                            aria-label={`Delete ${e.description}`}
-                            onClick={() => handleDelete(e)}
+                          <HoldButton
+                            ariaLabel={`Delete ${e.description}`}
+                            title="Press and hold to delete"
+                            icon={<TrashIcon />}
+                            doneIcon={<TrashIcon />}
+                            backgroundColor="var(--danger-soft)"
+                            fillColor="var(--danger-fill)"
+                            textColor="var(--danger)"
+                            fillTextColor="#ffffff"
+                            size="sm"
+                            radius={10}
+                            holdTime={1200}
+                            resetAfter={0}
+                            onHold={() => handleDelete(e)}
                           >
-                            <TrashIcon />
                             Delete
-                          </button>
+                          </HoldButton>
                         </td>
                       </tr>
                     ))}
@@ -299,6 +322,6 @@ export default function ExpensesPage() {
           )}
         </div>
       </section>
-    </>
+    </PageWindow>
   )
 }

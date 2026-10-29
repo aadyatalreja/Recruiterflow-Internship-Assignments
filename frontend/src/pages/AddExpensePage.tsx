@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Avatar from '../components/Avatar'
+import PageWindow from '../components/PageWindow'
 import { CATEGORIES, SPLIT_TYPES, type SplitType } from '../domain/types'
 import {
   MAX_DESCRIPTION_LENGTH,
@@ -109,7 +110,7 @@ export default function AddExpensePage() {
   const sharesField = values.splitType === 'exact' ? 'exactShares' : 'percentShares'
 
   return (
-    <>
+    <PageWindow title="New expense">
       <div className="page-header">
         <div>
           <h1>Add expense</h1>
@@ -302,6 +303,6 @@ export default function AddExpensePage() {
           </button>
         </div>
       </form>
-    </>
+    </PageWindow>
   )
 }
