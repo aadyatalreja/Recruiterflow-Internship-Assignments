@@ -1,0 +1,48 @@
+/* Neon colours: a white-hot core with a violet glow on dark; deep violet ink on light. */
+:root {
+  --neon-core: #5b21b6;
+  --neon-glow: #8b5cf6;
+  --neon-arc: #7c3aed;
+  --neon-plate: transparent;
+}
+:root[data-theme='dark'] {
+  --neon-core: #f5f3ff;
+  --neon-glow: #a78bfa;
+  --neon-arc: #ddd6fe;
+  /* A dark plate behind the sign so the glow reads against the glass card. */
+  --neon-plate: radial-gradient(closest-side, rgb(8 6 18 / 0.6), transparent);
+}
+
+.neon-404 {
+  width: min(100%, 26rem);
+  margin: 0 auto;
+  background: var(--neon-plate);
+  cursor: default;
+  transition: filter 0.4s ease;
+}
+.neon-404 svg { display: block; width: 100%; height: auto; overflow: visible; }
+.neon-404 text {
+  font-family: var(--font-sans);
+  font-size: 200px;
+  font-weight: 800;
+  letter-spacing: 6px;
+}
+
+.neon-404-bloom { fill: var(--neon-glow); opacity: 0.5; transition: opacity 0.4s ease; }
+.neon-404-glow { fill: var(--neon-glow); opacity: 0.85; transition: opacity 0.4s ease; }
+.neon-404-arc { fill: var(--neon-arc); opacity: 0.55; }
+.neon-404-crackle { fill: var(--neon-arc); }
+.neon-404-core { fill: var(--neon-core); }
+.neon-404-bolts { opacity: 0.6; transition: opacity 0.08s linear; }
+
+/* Hovered: the glow swells and the whole sign burns brighter. */
+.neon-404[data-hot] { filter: brightness(1.35) saturate(1.2); }
+.neon-404[data-hot] .neon-404-bloom { opacity: 1; }
+.neon-404[data-hot] .neon-404-glow { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-404,
+  .neon-404-bloom,
+  .neon-404-glow,
+  .neon-404-bolts { transition: none; }
+}

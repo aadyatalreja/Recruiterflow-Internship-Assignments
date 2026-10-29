@@ -580,9 +580,23 @@ input[type='text']:focus-visible, input[type='date']:focus-visible, select:focus
 /* ------------------------------------------------------------------------------------------
    Not found
    ------------------------------------------------------------------------------------------ */
-.not-found { display: grid; justify-items: center; gap: 0.75rem; max-width: 28rem; margin: 3rem auto; padding: 2.5rem 1.5rem; text-align: center; }
-.not-found-code { font-size: 3.5rem; font-weight: 800; line-height: 1; color: var(--primary); letter-spacing: -0.03em; }
-.not-found p { margin: 0 0 0.5rem; color: var(--text-muted); }
+/* Fills the space under the navbar and centres the card both ways. */
+.not-found-page { display: grid; place-items: center; min-height: calc(100dvh - 9rem); }
+.not-found {
+  display: grid; justify-items: center; gap: 0.75rem;
+  width: min(100%, 34rem); padding: 2rem 1.5rem 2.5rem; text-align: center;
+}
+/* Same near-opaque surface as the page windows, so the moving background can't wash out the neon. */
+.card.not-found {
+  border-color: var(--window-border);
+  border-radius: 1.25rem;
+  background: var(--window-bg);
+  box-shadow: var(--window-shadow);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+.not-found h1 { margin: 0; }
+.not-found p { margin: 0 0 0.75rem; color: var(--text-muted); }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
