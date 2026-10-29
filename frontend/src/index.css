@@ -17,11 +17,14 @@
   --text: #111827;
   --text-muted: #5b6475;
 
-  --primary: #4338ca;
-  --primary-hover: #3730a3;
-  --primary-soft: #eef0ff;
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-soft: #f3eefe;
   --on-primary: #ffffff;
-  --focus: #6366f1;
+  --focus: #8b5cf6;
+  /* Violet-to-purple gradient for filled brand accents (badges, tiles, the filter pill). */
+  --brand-from: #7c3aed;
+  --brand-to: #a855f7;
 
   --success: #047857;
   --success-soft: #e7f7ef;
@@ -29,21 +32,12 @@
   --danger-soft: #fdecef;
   /* Solid red behind white text, e.g. the hold-to-delete fill. */
   --danger-fill: #be123c;
-  --neutral-soft: #eef0f4;
 
   --radius-sm: 0.5rem;
   --radius: 0.75rem;
   --radius-lg: 1rem;
   --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06);
   --shadow: 0 1px 3px rgb(16 24 40 / 0.08), 0 4px 12px rgb(16 24 40 / 0.05);
-
-  /* Avatar and category tones: background / text pairs. */
-  --tone-1-bg: #e0e7ff; --tone-1-fg: #3730a3;
-  --tone-2-bg: #dcfce7; --tone-2-fg: #166534;
-  --tone-3-bg: #fef3c7; --tone-3-fg: #92400e;
-  --tone-4-bg: #fce7f3; --tone-4-fg: #9d174d;
-  --tone-5-bg: #e0f2fe; --tone-5-fg: #075985;
-  --tone-6-bg: #f3e8ff; --tone-6-fg: #6b21a8;
 }
 
 :root[data-theme='dark'] {
@@ -57,28 +51,20 @@
   --text: #e8ebf2;
   --text-muted: #9aa3b5;
 
-  --primary: #818cf8;
-  --primary-hover: #a5b4fc;
-  --primary-soft: #232a4a;
+  --primary: #a78bfa;
+  --primary-hover: #c4b5fd;
+  --primary-soft: #2a2145;
   --on-primary: #0d1017;
-  --focus: #a5b4fc;
+  --focus: #c4b5fd;
 
   --success: #34d399;
   --success-soft: #11291f;
   --danger: #fb7185;
   --danger-soft: #331820;
   --danger-fill: #e11d48;
-  --neutral-soft: #222836;
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow: 0 1px 3px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.25);
-
-  --tone-1-bg: #272f5c; --tone-1-fg: #c7d2fe;
-  --tone-2-bg: #173826; --tone-2-fg: #bbf7d0;
-  --tone-3-bg: #3d2f12; --tone-3-fg: #fde68a;
-  --tone-4-bg: #3f1a2e; --tone-4-fg: #fbcfe8;
-  --tone-5-bg: #11304a; --tone-5-fg: #bae6fd;
-  --tone-6-bg: #31204a; --tone-6-fg: #e9d5ff;
 }
 
 /* ------------------------------------------------------------------------------------------
@@ -163,6 +149,19 @@ main {
   gap: 1rem; margin-bottom: 1.5rem;
 }
 .page-subtitle { margin: 0.35rem 0 0; color: var(--text-muted); }
+/* Expenses page's Add expense button: a SpecularButton on the violet brand gradient.
+   Its edge light is white on the dark theme and deep purple on the light one, where white
+   would vanish against the pale page. */
+:root { --cta-line: #4c1d95; }
+:root[data-theme='dark'] { --cta-line: #ffffff; }
+.specular-button.add-expense-cta {
+  font-weight: 600;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--brand-from) 92%, transparent),
+      color-mix(in srgb, var(--brand-to) 88%, transparent));
+  box-shadow: 0 12px 26px -14px color-mix(in srgb, var(--brand-from) 85%, transparent);
+}
 
 .card {
   background: var(--surface);
@@ -208,24 +207,27 @@ button:hover, .button:hover { background: var(--surface-muted); }
   display: inline-grid; place-items: center; flex: none;
   width: 2.5rem; height: 2.5rem; border-radius: 50%;
   font-size: 0.85rem; font-weight: 700; letter-spacing: 0.02em;
+  /* One quiet style for everyone, mixed from the text colour so it suits both themes. */
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: color-mix(in srgb, var(--text) 75%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 10%, transparent);
 }
 .avatar-sm { width: 1.75rem; height: 1.75rem; font-size: 0.7rem; }
-.tone-1 { background: var(--tone-1-bg); color: var(--tone-1-fg); }
-.tone-2 { background: var(--tone-2-bg); color: var(--tone-2-fg); }
-.tone-3 { background: var(--tone-3-bg); color: var(--tone-3-fg); }
-.tone-4 { background: var(--tone-4-bg); color: var(--tone-4-fg); }
-.tone-5 { background: var(--tone-5-bg); color: var(--tone-5-fg); }
-.tone-6 { background: var(--tone-6-bg); color: var(--tone-6-fg); }
 
+/* Category pill: the category's icon and name on the same violet tint as the
+   Category dropdown, so every category reads as one calm family. */
 .chip {
-  display: inline-flex; align-items: center; padding: 0.15rem 0.6rem;
+  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem 0.2rem 0.45rem;
   border-radius: 999px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--primary) 14%, transparent),
+    color-mix(in srgb, #a855f7 10%, transparent));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.25);
+  color: var(--primary);
 }
-.chip-food { background: var(--tone-3-bg); color: var(--tone-3-fg); }
-.chip-travel { background: var(--tone-5-bg); color: var(--tone-5-fg); }
-.chip-stay { background: var(--tone-1-bg); color: var(--tone-1-fg); }
-.chip-activities { background: var(--tone-2-bg); color: var(--tone-2-fg); }
-.chip-other { background: var(--neutral-soft); color: var(--text-muted); }
+.chip svg { width: 0.85rem; height: 0.85rem; flex: none; stroke-width: 2; }
 
 .person { display: inline-flex; align-items: center; gap: 0.5rem; }
 
@@ -330,22 +332,12 @@ button:hover, .button:hover { background: var(--surface-muted); }
   gap: 0.75rem 1rem; padding: 1rem 1.15rem; border-bottom: 1px solid var(--border);
 }
 .filter { min-width: 0; margin: 0; padding: 0; border: 0; }
-.filter legend { float: left; margin-right: 0.75rem; padding: 0.35rem 0; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
-.filter-options { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.filter-option { position: relative; }
-.filter-option input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
-.filter-option span {
-  display: block; padding: 0.3rem 0.8rem; border: 1px solid var(--border-strong); border-radius: 999px;
-  font-size: 0.85rem; font-weight: 600; color: var(--text-muted); background: var(--surface);
-}
-.filter-option:hover span { color: var(--text); border-color: var(--text-muted); }
-.filter-option input:checked + span { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
-.filter-option input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+.filter legend { float: left; margin-right: 0.75rem; padding: 0.6rem 0; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
 .filtered-total { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
 .filtered-total strong { color: var(--text); font-size: 1rem; font-variant-numeric: tabular-nums; }
 
 .expense-table { width: 100%; border-collapse: collapse; }
-.expense-table th, .expense-table td { padding: 0.8rem 1.15rem; text-align: left; vertical-align: middle; }
+.expense-table th, .expense-table td { padding: 0.8rem 1rem; text-align: left; vertical-align: middle; }
 .expense-table th {
   font-size: 0.75rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.05em;
   color: var(--text-muted); background: var(--surface-muted); border-bottom: 1px solid var(--border);
@@ -364,7 +356,8 @@ button:hover, .button:hover { background: var(--surface-muted); }
 .expense-table .hold-button__label > span { gap: 6px; }
 
 .empty-state { display: grid; justify-items: center; gap: 0.5rem; padding: 2.5rem 1.25rem; text-align: center; }
-.empty-state svg { width: 4.5rem; height: 4.5rem; margin-bottom: 0.5rem; color: var(--primary); }
+/* Only the large illustration, not icons inside the empty state's buttons. */
+.empty-state > svg { width: 4.5rem; height: 4.5rem; margin-bottom: 0.5rem; color: var(--primary); }
 .empty-state h3 { font-size: 1.05rem; }
 .empty-state p { margin: 0 0 0.75rem; max-width: 26rem; color: var(--text-muted); }
 
@@ -480,6 +473,97 @@ input[type='text']:focus-visible, input[type='date']:focus-visible, select:focus
   background: var(--surface-muted); border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
+/* Numbered badge before each section's title: 1 Details, 2 Split. */
+.form-section-title,
+.form-section > .field > legend { display: flex; align-items: center; gap: 0.6rem; }
+.step-badge {
+  display: inline-grid; place-items: center; flex: none;
+  width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+  color: #fff; font-size: 0.8rem; font-weight: 700;
+  box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+/* The amount is the main fact of an expense, so its input is larger. */
+.amount-field input { min-height: 3rem; font-size: 1.3rem; font-weight: 700; }
+.amount-field .affix { font-size: 1.15rem; }
+.amount-field .affix-start ~ input { padding-left: 2.1rem; }
+
+.segment span { display: flex; align-items: center; justify-content: center; gap: 0.45rem; }
+.segment svg { width: 1rem; height: 1rem; flex: none; }
+
+/* Form beside a live summary on wide screens; the summary drops below on narrow ones. */
+.add-expense-layout { display: grid; gap: 1.5rem; align-items: start; }
+@media (min-width: 62rem) {
+  .add-expense-layout { grid-template-columns: minmax(0, 1fr) 18.5rem; }
+  .expense-summary { position: sticky; top: 5rem; }
+}
+
+.expense-summary { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.35rem; }
+.summary-eyebrow {
+  margin: 0; font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.summary-head { display: flex; align-items: center; gap: 0.9rem; min-width: 0; }
+/* The category's icon on a violet-to-purple tile, the same gradient as the step badges;
+   dashed and muted until a category is chosen. */
+.summary-icon {
+  display: grid; place-items: center; flex: none;
+  width: 2.9rem; height: 2.9rem; border-radius: 0.85rem;
+  background:
+    linear-gradient(160deg, rgb(255 255 255 / 0.28), rgb(255 255 255 / 0) 55%),
+    linear-gradient(135deg, var(--brand-from), var(--brand-to));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 8px 18px -8px color-mix(in srgb, var(--brand-from) 70%, transparent);
+  color: #fff;
+}
+.summary-icon svg { filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25)); }
+
+/* In the Category dropdown and its button: a soft tile tinted with the same two colours. */
+.select-lead:has(.category-glyph) {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--primary) 18%, transparent),
+    color-mix(in srgb, #a855f7 14%, transparent));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.3);
+  color: var(--primary);
+}
+.category-glyph { display: grid; place-items: center; }
+.category-glyph svg { stroke-width: 1.9; }
+.summary-icon-empty { background: none; box-shadow: none; border: 1.5px dashed var(--border-strong); color: var(--text-muted); }
+.summary-icon-empty svg { filter: none; }
+.summary-icon svg { width: 1.4rem; height: 1.4rem; }
+.summary-title-block { min-width: 0; }
+.summary-title { margin: 0; overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.summary-meta { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--text-muted); }
+.summary-amount {
+  margin: 0; font-size: 2rem; font-weight: 750; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  background: linear-gradient(90deg, var(--primary), #a855f7, #ec4899);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.summary-payer { display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+.summary-subheading {
+  margin: 0.25rem 0 0; padding-top: 0.9rem; border-top: 1px solid var(--border);
+  font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.summary-shares { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+.summary-shares li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.3rem 0.6rem; }
+.summary-share-name { overflow: hidden; font-size: 0.9rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.summary-share-amount { font-size: 0.9rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.summary-share-bar { grid-column: 2 / -1; height: 0.25rem; overflow: hidden; border-radius: 999px; background: var(--surface-muted); }
+.summary-share-bar > span {
+  display: block; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand-from), var(--brand-to));
+  transition: width 300ms ease;
+}
+.summary-empty { margin: 0; font-size: 0.88rem; color: var(--text-muted); }
+.page-window .summary-subheading { border-color: var(--inner-glass-border); }
+.page-window .summary-share-bar { background: var(--inner-glass-strong); }
+
 @media (max-width: 560px) {
   main { padding: 1.25rem 1rem 2.5rem; }
   h1 { font-size: 1.5rem; }
@@ -489,7 +573,8 @@ input[type='text']:focus-visible, input[type='date']:focus-visible, select:focus
   .form-actions { padding: 1rem 1.15rem; }
   .form-actions > * { flex: 1; }
   .share-row { grid-template-columns: auto minmax(0, 1fr) minmax(6rem, 8rem); }
-  .page-header > .button { width: 100%; }
+  .page-header > .button,
+  .page-header > .specular-button { width: 100%; }
 }
 
 /* ------------------------------------------------------------------------------------------
@@ -515,7 +600,7 @@ input[type='text']:focus-visible, input[type='date']:focus-visible, select:focus
 
 /* ------------------------------------------------------------------------------------------
    Animated background + glassmorphism.
-   The LiquidEther canvas sits fixed behind the app. Every block of text sits on a frosted
+   The LineWaves canvas sits fixed behind the app. Every block of text sits on a frosted
    glass panel: translucent fill, background blur, a light edge and a soft shadow. Panels
    nested inside a panel (cards in a section) use a lighter fill and no extra blur.
    ------------------------------------------------------------------------------------------ */
@@ -585,7 +670,6 @@ body {
 
 button:not(.button-primary):not(.hold-button),
 .button:not(.button-primary),
-.filter-option span,
 .member-chip,
 input[type='text'],
 input[type='date'],
@@ -653,7 +737,7 @@ select { background: var(--glass-bg-strong); }
   --pool-3: 20%;
   --inner-glass: rgb(255 255 255 / 0.42);
   --inner-glass-strong: rgb(255 255 255 / 0.8);
-  --inner-glass-border: rgb(99 102 241 / 0.14);
+  --inner-glass-border: rgb(124 58 237 / 0.14);
   --inner-glass-sheen: linear-gradient(135deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 55%);
   --inner-glass-shadow: 0 6px 20px rgb(30 41 99 / 0.07), inset 0 1px 0 rgb(255 255 255 / 0.95);
 }
@@ -699,8 +783,7 @@ select { background: var(--glass-bg-strong); }
 .page-window .segment input:checked + span { background: var(--inner-glass-strong); box-shadow: var(--inner-glass-shadow); }
 .page-window button:not(.button-primary):not(.hold-button),
 .page-window .button:not(.button-primary),
-.page-window .filter-option span,
-.page-window .member-chip,
+.page-window .page-window .member-chip,
 .page-window input[type='text'],
 .page-window input[type='date'],
 .page-window select { background: var(--inner-glass-strong); }

@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Avatar from '../components/Avatar'
+import { CATEGORY_STYLE } from '../components/categoryStyle'
 import GlassIcon, { type GlassIconColor } from '../components/GlassIcon'
 import HoldButton from '../components/HoldButton/HoldButton'
 import PageWindow from '../components/PageWindow'
+import PillFilter from '../components/PillFilter/PillFilter'
+import SpecularButton from '../components/SpecularButton/SpecularButton'
 import {
   ArrowDownLeftIcon,
   ArrowUpRightIcon,
@@ -14,6 +17,7 @@ import {
   TrashIcon,
 } from '../components/Icons'
 import { balanceStatus, computeBalances, type BalanceStatus } from '../domain/balances'
+import { formatDate } from '../domain/dates'
 import { formatINR } from '../domain/money'
 import { describeSplit } from '../domain/split'
 import { CATEGORIES, isCategory, type Expense } from '../domain/types'
@@ -48,23 +52,33 @@ const BALANCE_ICONS: Record<BalanceStatus['kind'], { color: GlassIconColor; icon
   settled: { color: 'graphite', icon: <CheckIcon /> },
 }
 
-/** "2026-03-12" -> "12 Mar 2026", formatted from the parts so no time zone can shift the day. */
-function formatDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number)
-  if (year === undefined || month === undefined || day === undefined) return isoDate
-  return new Date(year, month - 1, day).toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
 /** Newest date first; expenses on the same day keep most-recently-added first. */
 function sortNewestFirst(expenses: readonly Expense[]): Expense[] {
   return expenses
     .map((expense, index) => ({ expense, index }))
     .sort((a, b) => b.expense.date.localeCompare(a.expense.date) || b.index - a.index)
     .map(({ expense }) => expense)
+}
+
+/** Link to the Add expense page: a violet SpecularButton whose edge light follows the cursor. */
+function AddExpenseButton({ children }: { children: ReactNode }) {
+  return (
+    <SpecularButton
+      to="/expenses/new"
+      size="md"
+      radius={14}
+      // The violet gradient body comes from .add-expense-cta in index.css.
+      className="add-expense-cta"
+      textColor="#ffffff"
+      lineColor="var(--cta-line)"
+      baseColor="var(--brand-to)"
+      idleIntensity={0.5}
+      proximity={220}
+    >
+      <PlusIcon />
+      {children}
+    </SpecularButton>
+  )
 }
 
 export default function ExpensesPage() {
@@ -97,12 +111,6 @@ export default function ExpensesPage() {
   const memberName = useMemo(() => {
     const names = new Map(members.map((m) => [m.id, m.name]))
     return (id: string) => names.get(id) ?? 'Unknown member'
-  }, [members])
-
-  // Each member keeps the same avatar colour everywhere, based on their position in the trip.
-  const memberIndex = useMemo(() => {
-    const indexes = new Map(members.map((m, i) => [m.id, i]))
-    return (id: string) => indexes.get(id) ?? members.length
   }, [members])
 
   // Balances always cover every expense; the category filter only affects the table.
@@ -139,10 +147,7 @@ export default function ExpensesPage() {
           <h1>Expenses</h1>
           <p className="page-subtitle">Who paid for what, and who owes whom.</p>
         </div>
-        <Link to="/expenses/new" className="button button-primary">
-          <PlusIcon />
-          Add expense
-        </Link>
+        <AddExpenseButton>Add expense</AddExpenseButton>
       </div>
 
       <div role="status">
@@ -208,31 +213,18 @@ export default function ExpensesPage() {
               <ReceiptIcon />
               <h3>No expenses yet</h3>
               <p>Add what someone paid for and choose how to split it. Balances appear here.</p>
-              <Link to="/expenses/new" className="button button-primary">
-                <PlusIcon />
-                Add the first expense
-              </Link>
+              <AddExpenseButton>Add the first expense</AddExpenseButton>
             </div>
           ) : (
             <>
               <div className="table-toolbar">
-                <fieldset className="filter">
-                  <legend>Category</legend>
-                  <div className="filter-options">
-                    {FILTER_OPTIONS.map((c) => (
-                      <label key={c} className="filter-option">
-                        <input
-                          type="radio"
-                          name="category-filter"
-                          value={c}
-                          checked={category === c}
-                          onChange={(e) => handleCategoryChange(e.target.value)}
-                        />
-                        <span>{c}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
+                <PillFilter
+                  legend="Category"
+                  name="category-filter"
+                  options={FILTER_OPTIONS}
+                  value={category}
+                  onChange={handleCategoryChange}
+                />
                 <p className="filtered-total" aria-live="polite">
                   {category === 'All' ? 'Total' : `${category} total`}:{' '}
                   <strong>{formatINR(filteredTotal)}</strong> ({visible.length}{' '}
@@ -280,11 +272,14 @@ export default function ExpensesPage() {
                           {e.description}
                         </td>
                         <td data-label="Category">
-                          <span className={`chip chip-${e.category.toLowerCase()}`}>{e.category}</span>
+                          <span className="chip">
+                            {CATEGORY_STYLE[e.category].icon}
+                            {e.category}
+                          </span>
                         </td>
                         <td data-label="Paid by">
                           <span className="person">
-                            <Avatar name={memberName(e.paidBy)} index={memberIndex(e.paidBy)} size="sm" />
+                            <Avatar name={memberName(e.paidBy)} size="sm" />
                             {memberName(e.paidBy)}
                           </span>
                         </td>

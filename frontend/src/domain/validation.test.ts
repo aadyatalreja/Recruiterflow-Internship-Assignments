@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildExpense,
+  previewShares,
   validateAmount,
   validateDate,
   validateDescription,
@@ -125,5 +126,45 @@ describe('buildExpense', () => {
       'id1',
     )
     expect(expense.split).toEqual({ type: 'percent', shares: { m1: 33.33, m2: 66.67 } })
+  })
+})
+
+describe('previewShares', () => {
+  it('splits equally, giving leftover paise to the first members', () => {
+    expect(previewShares({ ...valid, equalMemberIds: ['m1', 'm2', 'm3'] })).toEqual({
+      m1: 3334,
+      m2: 3333,
+      m3: 3333,
+    })
+  })
+
+  it('ignores fields that do not affect the shares', () => {
+    expect(previewShares({ ...valid, description: '', paidBy: '', category: '' })).toEqual({
+      m1: 5000,
+      m2: 5000,
+    })
+  })
+
+  it('returns null until the amount is valid', () => {
+    expect(previewShares({ ...valid, amount: '' })).toBeNull()
+    expect(previewShares({ ...valid, amount: '-5' })).toBeNull()
+  })
+
+  it('returns null until an exact split adds up to the amount', () => {
+    const exact = { ...valid, splitType: 'exact' as const }
+    expect(previewShares({ ...exact, exactShares: { m1: '60' } })).toBeNull()
+    expect(previewShares({ ...exact, exactShares: { m1: '60', m2: '40' } })).toEqual({
+      m1: 6000,
+      m2: 4000,
+    })
+  })
+
+  it('converts percentages to paise once they add up to 100', () => {
+    const percent = { ...valid, splitType: 'percent' as const }
+    expect(previewShares({ ...percent, percentShares: { m1: '50' } })).toBeNull()
+    expect(previewShares({ ...percent, percentShares: { m1: '25', m2: '75' } })).toEqual({
+      m1: 2500,
+      m2: 7500,
+    })
   })
 })

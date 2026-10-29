@@ -1,4 +1,5 @@
 import { formatINR, parsePercentToBasisPoints, parseRupees, type ParseResult } from './money'
+import { computeShares } from './split'
 import { isCategory, type Expense, type Paise, type Split, type SplitType } from './types'
 
 export const MAX_DESCRIPTION_LENGTH = 60
@@ -164,20 +165,13 @@ function mustParse(result: ParseResult): number {
   return result.value
 }
 
-/**
- * Turns a form that passed `validateExpenseForm` into an Expense. Members left blank
- * in an exact or percent split are not included in the shares.
- */
-export function buildExpense(values: ExpenseFormValues, id: string): Expense {
-  if (!isCategory(values.category)) throw new Error('buildExpense called with unvalidated input')
-
-  let split: Split
+/** The split described by a form whose amount and split have passed validation. */
+function buildSplit(values: ExpenseFormValues): Split {
   switch (values.splitType) {
     case 'equal':
-      split = { type: 'equal', memberIds: [...values.equalMemberIds] }
-      break
+      return { type: 'equal', memberIds: [...values.equalMemberIds] }
     case 'exact':
-      split = {
+      return {
         type: 'exact',
         shares: Object.fromEntries(
           filledEntries(values.exactShares).map(([memberId, value]) => [
@@ -186,9 +180,8 @@ export function buildExpense(values: ExpenseFormValues, id: string): Expense {
           ]),
         ),
       }
-      break
     case 'percent':
-      split = {
+      return {
         type: 'percent',
         // PercentSplit stores percents; basis points / 100 keeps at most 2 decimals.
         shares: Object.fromEntries(
@@ -198,8 +191,32 @@ export function buildExpense(values: ExpenseFormValues, id: string): Expense {
           ]),
         ),
       }
-      break
   }
+}
+
+/**
+ * What each member would owe, for the live summary beside the form. Null while the amount
+ * or the split is still incomplete or invalid; the other fields don't matter here.
+ */
+export function previewShares(values: ExpenseFormValues): Record<string, Paise> | null {
+  if (validateAmount(values.amount) !== undefined) return null
+  const amount = mustParse(parseRupees(values.amount))
+  const splitErrors =
+    values.splitType === 'equal'
+      ? validateEqualSplit(values.equalMemberIds)
+      : values.splitType === 'exact'
+        ? validateExactSplit(values.exactShares, amount)
+        : validatePercentSplit(values.percentShares)
+  if (Object.keys(splitErrors).length > 0) return null
+  return computeShares(amount, buildSplit(values))
+}
+
+/**
+ * Turns a form that passed `validateExpenseForm` into an Expense. Members left blank
+ * in an exact or percent split are not included in the shares.
+ */
+export function buildExpense(values: ExpenseFormValues, id: string): Expense {
+  if (!isCategory(values.category)) throw new Error('buildExpense called with unvalidated input')
 
   return {
     id,
@@ -208,6 +225,6 @@ export function buildExpense(values: ExpenseFormValues, id: string): Expense {
     paidBy: values.paidBy,
     date: values.date,
     category: values.category,
-    split,
+    split: buildSplit(values),
   }
 }

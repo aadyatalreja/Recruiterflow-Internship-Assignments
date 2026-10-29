@@ -1,0 +1,43 @@
+/* A capsule of plain options with one gliding highlight pill, after React Bits' PillNav. */
+.pill-filter {
+  position: relative; display: flex; flex-wrap: wrap; gap: 2px;
+  padding: 4px; border-radius: 1.3rem;
+  background: var(--surface-muted);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.page-window .pill-filter {
+  background: var(--inner-glass);
+  box-shadow: inset 0 0 0 1px var(--inner-glass-border);
+}
+
+.pill-filter-glide {
+  position: absolute; top: 0; left: 0; z-index: 0;
+  border-radius: 999px; pointer-events: none;
+  background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 6px 16px -6px color-mix(in srgb, var(--brand-from) 70%, transparent);
+  transform-origin: 50% 50%;
+  will-change: transform, width;
+  opacity: 0;
+}
+/* Shown once the script has placed it; until then the chosen option paints its own pill. */
+.pill-filter[data-ready] .pill-filter-glide { opacity: 1; }
+
+.pill-filter-option { position: relative; z-index: 1; }
+.pill-filter-option input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.pill-filter-option span {
+  display: block; padding: 0.35rem 0.85rem; border-radius: 999px;
+  font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+  transition: color 0.25s ease;
+}
+.pill-filter-option:hover span { color: var(--text); }
+.pill-filter-option input:checked + span { color: #fff; }
+.pill-filter:not([data-ready]) .pill-filter-option input:checked + span {
+  background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+}
+.pill-filter-option input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-filter-option span { transition: none; }
+}

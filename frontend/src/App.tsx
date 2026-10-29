@@ -1,15 +1,14 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import LiquidEther from './components/LiquidEther/LiquidEther'
+import LineWaves from './components/LineWaves/LineWaves'
 import Navbar from './components/Navbar'
 import { useTheme } from './components/useTheme'
 import AddExpensePage from './pages/AddExpensePage'
 import ExpensesPage from './pages/ExpensesPage'
 import NotFoundPage from './pages/NotFoundPage'
 
-// Liquid colours, from calm to fast flow. Dark mode glows; light mode draws soft ink in the
-// app's indigo/violet family, so it reads as colour on a pale page rather than a dark smudge.
-const DARK_COLORS = ['#5227FF', '#FF9FFC', '#B497CF']
-const LIGHT_COLORS = ['#6366f1', '#a855f7', '#ec4899']
+// Purple-to-pink line colours. In light mode LineWaves draws them as deeper ink of the same
+// hues, so one palette works on both themes.
+const LINE_COLORS = ['#a855f7', '#ec4899', '#7c3aed'] as const
 
 export default function App() {
   const { theme, toggleTheme } = useTheme()
@@ -19,25 +18,20 @@ export default function App() {
     <BrowserRouter>
       {/* Decorative animated background, fixed behind everything. */}
       <div className="app-background" aria-hidden="true">
-        <LiquidEther
-          colors={dark ? DARK_COLORS : LIGHT_COLORS}
+        <LineWaves
+          color1={LINE_COLORS[0]}
+          color2={LINE_COLORS[1]}
+          color3={LINE_COLORS[2]}
           lightMode={!dark}
-          // Colour strength follows flow speed, so the gentle ambient flow needs a brightness
-          // boost to be visible; ink on white needs a little more than glow on dark.
-          intensity={dark ? 1.5 : 1.8}
-          // The liquid always flows on its own; moving the cursor stirs it harder on top.
-          // The page window hides the middle of the screen, so the automatic stirrer roams out
-          // to the edges (autoRange 0.5) and the swirls linger longer (persistence 0.9) to stay
-          // visible around the window. Automatic stirring scales with mouseForce too, so
-          // autoIntensity is set relative to it: ambient strength = mouseForce / 20 x 2.4.
-          alwaysFlow
-          autoDemo
-          autoSpeed={0.6}
-          autoRange={0.5}
-          autoIntensity={2.4}
-          mouseForce={40}
-          cursorSize={140}
-          persistence={0.9}
+          speed={0.38}
+          lineCount={85}
+          lineWidth={1.35}
+          highlight={1}
+          warpIntensity={1.25}
+          rotation={-33}
+          colorCycleSpeed={2.4}
+          glow={0.65}
+          brightness={dark ? 1.1 : 1.3}
         />
       </div>
 

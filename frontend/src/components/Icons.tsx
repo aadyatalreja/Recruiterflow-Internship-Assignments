@@ -98,3 +98,84 @@ export function CheckIcon() {
     </svg>
   )
 }
+
+export function ChevronDownIcon() {
+  return (
+    <svg {...common}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
+export function FoodIcon() {
+  return (
+    <svg {...common}>
+      <path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17 21V3c-2 1-3.5 3.5-3.5 7 0 2 1.5 3 3.5 3" />
+    </svg>
+  )
+}
+
+export function TravelIcon() {
+  return (
+    <svg {...common}>
+      <path d="M5 12.5 6.6 8.3A2 2 0 0 1 8.5 7h7a2 2 0 0 1 1.9 1.3l1.6 4.2" />
+      <rect x="3" y="12.5" width="18" height="5.5" rx="1.5" />
+      <path d="M6 18v2M18 18v2M7 15.25h.01M17 15.25h.01" />
+    </svg>
+  )
+}
+
+export function StayIcon() {
+  return (
+    <svg {...common}>
+      <path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6M7 12.5a1.5 1.5 0 1 0 0-.01" />
+    </svg>
+  )
+}
+
+export function ActivitiesIcon() {
+  return (
+    <svg {...common}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m15.5 8.5-2 5-5 2 2-5 5-2Z" />
+    </svg>
+  )
+}
+
+export function OtherIcon() {
+  return (
+    <svg {...common}>
+      <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z" />
+      <circle cx="7.5" cy="7.5" r="1" />
+    </svg>
+  )
+}
+
+/** Equal split: everyone pays the same. */
+export function EqualsIcon() {
+  return (
+    <svg {...common}>
+      <path d="M5 9h14M5 15h14" />
+    </svg>
+  )
+}
+
+/** Exact amounts: a rupee sign. */
+export function RupeeIcon() {
+  return (
+    <svg {...common}>
+      <path d="M6 4h12M6 9h12M9 4h1.5a5 5 0 0 1 0 10H6l8 6" />
+    </svg>
+  )
+}
+
+/** Percentages. */
+export function PercentIcon() {
+  return (
+    <svg {...common}>
+      <path d="M19 5 5 19" />
+      <circle cx="7" cy="7" r="2.5" />
+      <circle cx="17" cy="17" r="2.5" />
+    </svg>
+  )
+}

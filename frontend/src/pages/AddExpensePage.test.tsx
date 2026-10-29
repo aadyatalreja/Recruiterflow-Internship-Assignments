@@ -40,6 +40,12 @@ function renderForm() {
 
 const save = () => screen.getByRole('button', { name: 'Save' })
 
+/** Opens a dropdown by its label and clicks one of its options. */
+async function choose(user: ReturnType<typeof userEvent.setup>, label: string, option: string | RegExp) {
+  await user.click(screen.getByRole('combobox', { name: label }))
+  await user.click(screen.getByRole('option', { name: option }))
+}
+
 describe('AddExpensePage', () => {
   it('shows an error next to each invalid field and saves nothing', async () => {
     const { store, user } = renderForm()
@@ -83,8 +89,8 @@ describe('AddExpensePage', () => {
 
     await user.type(screen.getByLabelText('Description'), 'Beach dinner')
     await user.type(screen.getByLabelText('Amount (₹)'), '1250.50')
-    await user.selectOptions(screen.getByLabelText('Paid by'), 'm2')
-    await user.selectOptions(screen.getByLabelText('Category'), 'Food')
+    await choose(user, 'Paid by', 'Bala')
+    await choose(user, 'Category', /^Food/)
     // Equal split starts with every member ticked; leave Chitra out.
     await user.click(screen.getByRole('checkbox', { name: 'Chitra' }))
     await user.click(save())
@@ -109,8 +115,8 @@ describe('AddExpensePage', () => {
 
     await user.type(screen.getByLabelText('Description'), 'Villa')
     await user.type(screen.getByLabelText('Amount (₹)'), '100')
-    await user.selectOptions(screen.getByLabelText('Paid by'), 'm1')
-    await user.selectOptions(screen.getByLabelText('Category'), 'Stay')
+    await choose(user, 'Paid by', 'Asha')
+    await choose(user, 'Category', /^Stay/)
     await user.click(screen.getByLabelText('Percentages'))
     await user.type(screen.getByLabelText('Asha'), '33.33')
     await user.type(screen.getByLabelText('Bala'), '33.33')

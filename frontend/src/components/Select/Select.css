@@ -1,0 +1,133 @@
+/* Dropdown menu styled after React Bits' AnimatedList: a frosted panel of raised tiles. */
+:root {
+  --sl-frame: rgb(246 246 249 / 0.86);
+  --sl-frame-edge: rgb(24 24 27 / 0.07);
+  --sl-frame-highlight: rgb(255 255 255 / 0.95);
+  --sl-frame-shadow: 0 22px 44px -22px rgb(24 24 27 / 0.3), 0 6px 16px -10px rgb(24 24 27 / 0.16);
+  --sl-tile: linear-gradient(180deg, #ffffff 0%, #f6f6f8 100%);
+  --sl-tile-edge: rgb(24 24 27 / 0.08);
+  --sl-tile-highlight: rgb(255 255 255 / 1);
+  --sl-tile-shadow: 0 4px 10px -5px rgb(24 24 27 / 0.25);
+  --sl-well: rgb(24 24 27 / 0.05);
+  --sl-hover: brightness(0.97);
+  /* Spring easing sampled from AnimatedList: a quick overshoot that settles. */
+  --sl-spring: linear(0, 0.0603, 0.2033, 0.3821, 0.5633, 0.7258, 0.8584, 0.9574, 1.0242, 1.0634, 1.0809,
+    1.0828, 1.0747, 1.0613, 1.046, 1.0313, 1.0186, 1.0085, 1.0012, 0.9965, 0.994, 0.9931, 0.9933, 0.9941,
+    0.9953, 0.9966, 0.9978, 0.9988, 1);
+}
+
+:root[data-theme='dark'] {
+  --sl-frame: rgb(38 35 46 / 0.9);
+  --sl-frame-edge: rgb(255 255 255 / 0.08);
+  --sl-frame-highlight: rgb(255 255 255 / 0.07);
+  --sl-frame-shadow: 0 22px 44px -20px rgb(0 0 0 / 0.8), 0 6px 16px -8px rgb(0 0 0 / 0.5);
+  --sl-tile: linear-gradient(180deg, #3a3644 0%, #27242f 100%);
+  --sl-tile-edge: rgb(255 255 255 / 0.07);
+  --sl-tile-highlight: rgb(255 255 255 / 0.12);
+  --sl-tile-shadow: 0 4px 10px -4px rgb(0 0 0 / 0.7);
+  --sl-well: rgb(255 255 255 / 0.08);
+  --sl-hover: brightness(1.14);
+}
+
+.select { position: relative; }
+
+/* The closed control matches the text inputs next to it. */
+.select-trigger {
+  justify-content: space-between; gap: 0.6rem;
+  width: 100%; min-height: 2.6rem; padding: 0.35rem 0.6rem 0.35rem 0.75rem;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  font-weight: 500; text-align: left; color: var(--text);
+  transition: border-color 120ms, box-shadow 120ms;
+}
+.select-trigger:hover { border-color: var(--text-muted); }
+.select-trigger:focus-visible,
+.select[data-open] .select-trigger {
+  outline: none; border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent);
+}
+.select-trigger[aria-invalid='true'] { border-color: var(--danger); }
+
+.select-value { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.select-value-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.select-placeholder { color: var(--text-muted); }
+.select-chevron { display: grid; color: var(--text-muted); transition: transform 200ms ease; }
+.select-trigger .select-chevron svg { width: 1.1rem; height: 1.1rem; }
+.select[data-open] .select-chevron { transform: rotate(180deg); }
+
+.select-menu {
+  position: absolute; top: calc(100% + 0.4rem); left: 0; right: 0; z-index: 30;
+  max-height: 19rem; padding: 6px; overflow-y: auto; overscroll-behavior: contain;
+  border-radius: 1.1rem;
+  background: var(--sl-frame);
+  box-shadow: inset 0 0 0 1px var(--sl-frame-edge), inset 0 1px 0 var(--sl-frame-highlight), var(--sl-frame-shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  scrollbar-width: thin;
+  transform-origin: top center;
+  animation: select-menu-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.select-track { position: relative; display: flex; flex-direction: column; gap: 6px; }
+
+.select-option {
+  position: relative; display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem; border-radius: 0.75rem;
+  background: var(--sl-tile); box-shadow: var(--sl-tile-shadow);
+  color: var(--text); cursor: pointer; user-select: none;
+  /* Tiles pop in one after another, like AnimatedList's entrance. */
+  animation: select-option-in 620ms var(--sl-spring) both;
+  animation-delay: calc(var(--select-index) * 35ms);
+}
+.select-option[data-active] { filter: var(--sl-hover); }
+.select-option:active { filter: brightness(0.92); }
+.select-option-rim {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px var(--sl-tile-edge), inset 0 1px 0 var(--sl-tile-highlight);
+}
+
+.select-lead {
+  display: grid; place-items: center; flex: none;
+  width: 2rem; height: 2rem; border-radius: 0.55rem;
+  background: var(--sl-well); color: var(--text);
+}
+.select-trigger .select-lead { width: 1.75rem; height: 1.75rem; }
+.select-lead svg { width: 1rem; height: 1rem; }
+/* Avatars bring their own coloured circle. */
+.select-lead:has(.avatar) { background: none; }
+
+.select-option-text { display: flex; flex: 1; flex-direction: column; gap: 1px; min-width: 0; }
+.select-option-label { font-size: 0.9rem; font-weight: 600; line-height: 1.3; }
+.select-option-description { font-size: 0.8rem; line-height: 1.35; color: var(--text-muted); }
+
+/* A tick on the option that is currently chosen. */
+.select-check {
+  flex: none; width: 0.4rem; height: 0.75rem; margin: 0 0.25rem 0.2rem 0;
+  border: solid var(--primary); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+
+/* Outline that springs to the highlighted option. */
+.select-ring {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 1; height: 0;
+  border-radius: 0.75rem; pointer-events: none;
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+.select-ring[data-animate='true'] {
+  transition: transform 520ms var(--sl-spring), height 520ms var(--sl-spring);
+}
+
+@keyframes select-menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+}
+
+@keyframes select-option-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.85); }
+  40% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-menu,
+  .select-option { animation: none; }
+  .select-ring[data-animate='true'],
+  .select-chevron { transition: none; }
+}
