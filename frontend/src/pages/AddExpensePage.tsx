@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Avatar from '../components/Avatar'
 import { CATEGORIES, SPLIT_TYPES, type SplitType } from '../domain/types'
 import {
   MAX_DESCRIPTION_LENGTH,
@@ -23,6 +24,12 @@ const SPLIT_LABELS: Record<SplitType, string> = {
   equal: 'Equally',
   exact: 'Exact amounts',
   percent: 'Percentages',
+}
+
+const SPLIT_HELP: Record<SplitType, string> = {
+  equal: 'Everyone selected pays the same share. Any leftover paisa goes to the first people listed.',
+  exact: 'Enter what each person owes in ₹. The amounts must add up to the total.',
+  percent: 'Enter each person’s share as a percentage. The percentages must add up to 100.',
 }
 
 /** Message rendered right after a field; its id is referenced by aria-describedby. */
@@ -103,165 +110,195 @@ export default function AddExpensePage() {
 
   return (
     <>
-      <h1>Add expense</h1>
-      <form className="expense-form" noValidate onSubmit={handleSubmit}>
-        <div className="field">
-          <label htmlFor="description">Description</label>
-          <input
-            id="description"
-            type="text"
-            value={values.description}
-            onChange={(e) => update({ description: e.target.value })}
-            {...errorProps(errors, 'description', 'description-error')}
-          />
-          <p className="field-hint">Up to {MAX_DESCRIPTION_LENGTH} characters</p>
-          <FieldError id="description-error" message={errors.description} />
+      <div className="page-header">
+        <div>
+          <h1>Add expense</h1>
+          <p className="page-subtitle">Record what was paid, then choose how to split it.</p>
         </div>
+      </div>
 
-        <div className="field">
-          <label htmlFor="amount">Amount (₹)</label>
-          <input
-            id="amount"
-            type="text"
-            inputMode="decimal"
-            placeholder="0.00"
-            value={values.amount}
-            onChange={(e) => update({ amount: e.target.value })}
-            {...errorProps(errors, 'amount', 'amount-error')}
-          />
-          <FieldError id="amount-error" message={errors.amount} />
-        </div>
+      <form className="card expense-form" noValidate onSubmit={handleSubmit}>
+        <div className="form-section">
+          <h2 className="form-section-title">Details</h2>
+          <div className="form-grid">
+            <div className="field span-2">
+              <label htmlFor="description">Description</label>
+              <input
+                id="description"
+                type="text"
+                placeholder="e.g. Beach shack dinner"
+                value={values.description}
+                onChange={(e) => update({ description: e.target.value })}
+                {...errorProps(errors, 'description', 'description-error')}
+              />
+              <p className="field-hint">
+                {values.description.length} / {MAX_DESCRIPTION_LENGTH} characters
+              </p>
+              <FieldError id="description-error" message={errors.description} />
+            </div>
 
-        <div className="field">
-          <label htmlFor="paidBy">Paid by</label>
-          <select
-            id="paidBy"
-            value={values.paidBy}
-            onChange={(e) => update({ paidBy: e.target.value })}
-            {...errorProps(errors, 'paidBy', 'paidBy-error')}
-          >
-            <option value="">Choose a member</option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-          <FieldError id="paidBy-error" message={errors.paidBy} />
-        </div>
-
-        <div className="field">
-          <label htmlFor="date">Date</label>
-          <input
-            id="date"
-            type="date"
-            max={today}
-            value={values.date}
-            onChange={(e) => update({ date: e.target.value })}
-            {...errorProps(errors, 'date', 'date-error')}
-          />
-          <FieldError id="date-error" message={errors.date} />
-        </div>
-
-        <div className="field">
-          <label htmlFor="category">Category</label>
-          <select
-            id="category"
-            value={values.category}
-            onChange={(e) => update({ category: e.target.value })}
-            {...errorProps(errors, 'category', 'category-error')}
-          >
-            <option value="">Choose a category</option>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <FieldError id="category-error" message={errors.category} />
-        </div>
-
-        <fieldset className="field">
-          <legend>Split</legend>
-          <div className="radio-row">
-            {SPLIT_TYPES.map((type) => (
-              <label key={type} className="inline-label">
+            <div className="field">
+              <label htmlFor="amount">Amount (₹)</label>
+              <div className="input-affix">
+                <span className="affix affix-start" aria-hidden="true">
+                  ₹
+                </span>
                 <input
-                  type="radio"
-                  name="splitType"
-                  value={type}
-                  checked={values.splitType === type}
-                  onChange={() => update({ splitType: type })}
+                  id="amount"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={values.amount}
+                  onChange={(e) => update({ amount: e.target.value })}
+                  {...errorProps(errors, 'amount', 'amount-error')}
                 />
-                {SPLIT_LABELS[type]}
-              </label>
-            ))}
+              </div>
+              <FieldError id="amount-error" message={errors.amount} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="date">Date</label>
+              <input
+                id="date"
+                type="date"
+                max={today}
+                value={values.date}
+                onChange={(e) => update({ date: e.target.value })}
+                {...errorProps(errors, 'date', 'date-error')}
+              />
+              <FieldError id="date-error" message={errors.date} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="paidBy">Paid by</label>
+              <select
+                id="paidBy"
+                value={values.paidBy}
+                onChange={(e) => update({ paidBy: e.target.value })}
+                {...errorProps(errors, 'paidBy', 'paidBy-error')}
+              >
+                <option value="">Choose a member</option>
+                {members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+              <FieldError id="paidBy-error" message={errors.paidBy} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="category">Category</label>
+              <select
+                id="category"
+                value={values.category}
+                onChange={(e) => update({ category: e.target.value })}
+                {...errorProps(errors, 'category', 'category-error')}
+              >
+                <option value="">Choose a category</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <FieldError id="category-error" message={errors.category} />
+            </div>
           </div>
-        </fieldset>
+        </div>
 
-        <fieldset
-          className="field"
-          aria-describedby={errors.split ? 'split-error' : undefined}
-          aria-invalid={errors.split ? true : undefined}
-        >
-          <legend>
-            {values.splitType === 'equal'
-              ? 'Split between'
-              : values.splitType === 'exact'
-                ? 'Amount per member (₹) — leave blank to exclude'
-                : 'Percentage per member — leave blank to exclude'}
-          </legend>
-
-          {values.splitType === 'equal' ? (
-            <div className="member-list">
-              {members.map((m) => (
-                <label key={m.id} className="inline-label">
+        <div className="form-section">
+          <fieldset className="field">
+            <legend>Split</legend>
+            <div className="segmented">
+              {SPLIT_TYPES.map((type) => (
+                <label key={type} className="segment">
                   <input
-                    type="checkbox"
-                    checked={values.equalMemberIds.includes(m.id)}
-                    onChange={(e) => toggleEqualMember(m.id, e.target.checked)}
-                    // Focus target when "select at least one member" is the first error.
-                    aria-invalid={errors.split ? true : undefined}
+                    type="radio"
+                    name="splitType"
+                    value={type}
+                    checked={values.splitType === type}
+                    onChange={() => update({ splitType: type })}
                   />
-                  {m.name}
+                  <span>{SPLIT_LABELS[type]}</span>
                 </label>
               ))}
             </div>
-          ) : (
-            <div className="member-list">
-              {members.map((m) => {
-                const key = shareErrorKey(m.id)
-                const inputId = `${sharesField}-${m.id}`
-                return (
-                  <div key={m.id} className="share-row">
-                    <label htmlFor={inputId}>{m.name}</label>
+            <p className="split-help">{SPLIT_HELP[values.splitType]}</p>
+          </fieldset>
+
+          <fieldset
+            className="field split-members"
+            aria-describedby={errors.split ? 'split-error' : undefined}
+            aria-invalid={errors.split ? true : undefined}
+          >
+            <legend>
+              {values.splitType === 'equal'
+                ? 'Split between'
+                : values.splitType === 'exact'
+                  ? 'Amount per member (₹) — leave blank to exclude'
+                  : 'Percentage per member — leave blank to exclude'}
+            </legend>
+
+            {values.splitType === 'equal' ? (
+              <div className="member-chips">
+                {members.map((m, i) => (
+                  <label key={m.id} className="member-chip">
                     <input
-                      id={inputId}
-                      type="text"
-                      inputMode="decimal"
-                      placeholder={values.splitType === 'exact' ? '0.00' : '0'}
-                      value={shareInputs[m.id] ?? ''}
-                      onChange={(e) =>
-                        update({ [sharesField]: { ...shareInputs, [m.id]: e.target.value } })
-                      }
-                      {...errorProps(errors, key, `${inputId}-error`)}
+                      type="checkbox"
+                      checked={values.equalMemberIds.includes(m.id)}
+                      onChange={(e) => toggleEqualMember(m.id, e.target.checked)}
+                      // Focus target when "select at least one member" is the first error.
+                      aria-invalid={errors.split ? true : undefined}
                     />
-                    {values.splitType === 'percent' && <span aria-hidden="true">%</span>}
-                    <FieldError id={`${inputId}-error`} message={errors[key]} />
-                  </div>
-                )
-              })}
-            </div>
-          )}
-          <FieldError id="split-error" message={errors.split} />
-        </fieldset>
+                    <Avatar name={m.name} index={i} size="sm" />
+                    {m.name}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="share-list">
+                {members.map((m, i) => {
+                  const key = shareErrorKey(m.id)
+                  const inputId = `${sharesField}-${m.id}`
+                  const isExact = values.splitType === 'exact'
+                  return (
+                    <div key={m.id} className="share-row">
+                      {/* Outside the label, so the label's text stays exactly the member's name. */}
+                      <Avatar name={m.name} index={i} size="sm" />
+                      <label htmlFor={inputId}>{m.name}</label>
+                      <div className="input-affix">
+                        <span className={`affix ${isExact ? 'affix-start' : 'affix-end'}`} aria-hidden="true">
+                          {isExact ? '₹' : '%'}
+                        </span>
+                        <input
+                          id={inputId}
+                          type="text"
+                          inputMode="decimal"
+                          placeholder={isExact ? '0.00' : '0'}
+                          value={shareInputs[m.id] ?? ''}
+                          onChange={(e) =>
+                            update({ [sharesField]: { ...shareInputs, [m.id]: e.target.value } })
+                          }
+                          {...errorProps(errors, key, `${inputId}-error`)}
+                        />
+                      </div>
+                      <FieldError id={`${inputId}-error`} message={errors[key]} />
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            <FieldError id="split-error" message={errors.split} />
+          </fieldset>
+        </div>
 
         <div className="form-actions">
-          <button type="submit" className="button-primary">
-            Save
-          </button>
           <button type="button" onClick={() => void navigate('/')}>
             Cancel
+          </button>
+          <button type="submit" className="button-primary">
+            Save
           </button>
         </div>
       </form>

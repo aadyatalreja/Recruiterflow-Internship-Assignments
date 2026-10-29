@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import Avatar from '../components/Avatar'
+import { CheckCircleIcon, PlusIcon, ReceiptIcon, TrashIcon } from '../components/Icons'
 import { balanceStatus, computeBalances, type BalanceStatus } from '../domain/balances'
 import { formatINR } from '../domain/money'
 import { describeSplit } from '../domain/split'
@@ -14,6 +16,8 @@ function addedFrom(state: unknown): string | null {
   }
   return null
 }
+
+const FILTER_OPTIONS = ['All', ...CATEGORIES] as const
 
 function describeBalance(status: BalanceStatus): string {
   switch (status.kind) {
@@ -77,6 +81,12 @@ export default function ExpensesPage() {
     return (id: string) => names.get(id) ?? 'Unknown member'
   }, [members])
 
+  // Each member keeps the same avatar colour everywhere, based on their position in the trip.
+  const memberIndex = useMemo(() => {
+    const indexes = new Map(members.map((m, i) => [m.id, i]))
+    return (id: string) => indexes.get(id) ?? members.length
+  }, [members])
+
   // Balances always cover every expense; the category filter only affects the table.
   const balances = useMemo(() => computeBalances(members, expenses), [members, expenses])
 
@@ -89,6 +99,9 @@ export default function ExpensesPage() {
   const expensesHeading = useRef<HTMLHeadingElement>(null)
 
   const filteredTotal = visible.reduce((sum, e) => sum + e.amount, 0)
+  const tripTotal = expenses.reduce((sum, e) => sum + e.amount, 0)
+  // Scales the balance bars: the largest balance, either way, fills its bar.
+  const largestBalance = Math.max(1, ...members.map((m) => Math.abs(balances[m.id] ?? 0)))
 
   function handleCategoryChange(value: string) {
     setSearchParams(isCategory(value) ? { category: value } : {}, { replace: true })
@@ -106,18 +119,61 @@ export default function ExpensesPage() {
 
   return (
     <>
-      <h1>Expenses</h1>
-      <div role="status">{message && <p className="flash">{message}</p>}</div>
+      <div className="page-header">
+        <div>
+          <h1>Expenses</h1>
+          <p className="page-subtitle">Who paid for what, and who owes whom.</p>
+        </div>
+        <Link to="/expenses/new" className="button button-primary">
+          <PlusIcon />
+          Add expense
+        </Link>
+      </div>
+
+      <div role="status">
+        {message && (
+          <p className="flash">
+            <CheckCircleIcon />
+            {message}
+          </p>
+        )}
+      </div>
+
+      <dl className="stats">
+        <div className="card stat">
+          <dt>Trip total</dt>
+          <dd>{formatINR(tripTotal)}</dd>
+        </div>
+        <div className="card stat">
+          <dt>Expenses</dt>
+          <dd>{expenses.length}</dd>
+        </div>
+        <div className="card stat">
+          <dt>Members</dt>
+          <dd>{members.length}</dd>
+        </div>
+      </dl>
 
       <section aria-labelledby="balances-heading" className="section">
-        <h2 id="balances-heading">Balances</h2>
+        <div className="section-header">
+          <h2 id="balances-heading">Balances</h2>
+          <p className="section-note">Across every expense, whatever the filter</p>
+        </div>
         <ul className="balance-list">
-          {members.map((m) => {
-            const status = balanceStatus(balances[m.id] ?? 0)
+          {members.map((m, i) => {
+            const balance = balances[m.id] ?? 0
+            const status = balanceStatus(balance)
+            const barWidth = `${(Math.abs(balance) / largestBalance) * 100}%`
             return (
-              <li key={m.id} className={`balance balance-${status.kind}`}>
-                <span className="balance-name">{m.name}</span>{' '}
-                <span className="balance-status">{describeBalance(status)}</span>
+              <li key={m.id} className={`card balance balance-${status.kind}`}>
+                <Avatar name={m.name} index={i} />
+                <div className="balance-body">
+                  <span className="balance-name">{m.name}</span>{' '}
+                  <span className="balance-status">{describeBalance(status)}</span>
+                  <span className="balance-bar" aria-hidden="true">
+                    <span style={{ width: barWidth }} />
+                  </span>
+                </div>
               </li>
             )
           })}
@@ -125,103 +181,123 @@ export default function ExpensesPage() {
       </section>
 
       <section aria-labelledby="expenses-heading" className="section">
-        <h2 id="expenses-heading" ref={expensesHeading} tabIndex={-1}>
-          All expenses
-        </h2>
+        <div className="section-header">
+          <h2 id="expenses-heading" ref={expensesHeading} tabIndex={-1}>
+            All expenses
+          </h2>
+        </div>
 
-        {expenses.length === 0 ? (
-          <div className="empty-state">
-            <p>No expenses yet.</p>
-            <Link to="/expenses/new">Add the first expense</Link>
-          </div>
-        ) : (
-          <>
-            <div className="table-toolbar">
-              <div className="field field-inline">
-                <label htmlFor="category-filter">Category</label>
-                <select
-                  id="category-filter"
-                  value={category}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                >
-                  <option value="All">All</option>
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p className="filtered-total" aria-live="polite">
-                {category === 'All' ? 'Total' : `${category} total`}:{' '}
-                <strong>{formatINR(filteredTotal)}</strong>
-                <span className="muted">
-                  {' '}
-                  ({visible.length} {visible.length === 1 ? 'expense' : 'expenses'})
-                </span>
-              </p>
+        <div className="card table-card">
+          {expenses.length === 0 ? (
+            <div className="empty-state">
+              <ReceiptIcon />
+              <h3>No expenses yet</h3>
+              <p>Add what someone paid for and choose how to split it. Balances appear here.</p>
+              <Link to="/expenses/new" className="button button-primary">
+                <PlusIcon />
+                Add the first expense
+              </Link>
             </div>
-
-            {visible.length === 0 ? (
-              <div className="empty-state">
-                <p>No {category} expenses yet.</p>
-                <button type="button" onClick={() => handleCategoryChange('All')}>
-                  Show all categories
-                </button>
+          ) : (
+            <>
+              <div className="table-toolbar">
+                <fieldset className="filter">
+                  <legend>Category</legend>
+                  <div className="filter-options">
+                    {FILTER_OPTIONS.map((c) => (
+                      <label key={c} className="filter-option">
+                        <input
+                          type="radio"
+                          name="category-filter"
+                          value={c}
+                          checked={category === c}
+                          onChange={(e) => handleCategoryChange(e.target.value)}
+                        />
+                        <span>{c}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <p className="filtered-total" aria-live="polite">
+                  {category === 'All' ? 'Total' : `${category} total`}:{' '}
+                  <strong>{formatINR(filteredTotal)}</strong> ({visible.length}{' '}
+                  {visible.length === 1 ? 'expense' : 'expenses'})
+                </p>
               </div>
-            ) : (
-              // Below 640px the CSS turns each row into a card, using data-label as the field name.
-              <table className="expense-table">
-                <caption className="visually-hidden">
-                  Expenses{category === 'All' ? '' : ` in ${category}`}, newest first
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Date</th>
-                    <th scope="col">Description</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Paid by</th>
-                    <th scope="col" className="num">
-                      Amount
-                    </th>
-                    <th scope="col">Split</th>
-                    <th scope="col">
-                      <span className="visually-hidden">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visible.map((e) => (
-                    <tr key={e.id}>
-                      <td data-label="Date">
-                        <time dateTime={e.date}>{formatDate(e.date)}</time>
-                      </td>
-                      <td data-label="Description" className="description">
-                        {e.description}
-                      </td>
-                      <td data-label="Category">{e.category}</td>
-                      <td data-label="Paid by">{memberName(e.paidBy)}</td>
-                      <td data-label="Amount" className="num">
-                        {formatINR(e.amount)}
-                      </td>
-                      <td data-label="Split">{describeSplit(e.split)}</td>
-                      <td className="actions">
-                        <button
-                          type="button"
-                          className="button-danger"
-                          aria-label={`Delete ${e.description}`}
-                          onClick={() => handleDelete(e)}
-                        >
-                          Delete
-                        </button>
-                      </td>
+
+              {visible.length === 0 ? (
+                <div className="empty-state">
+                  <ReceiptIcon />
+                  <h3>No {category} expenses yet</h3>
+                  <p>Nothing in this category so far. Pick another one, or show everything.</p>
+                  <button type="button" onClick={() => handleCategoryChange('All')}>
+                    Show all categories
+                  </button>
+                </div>
+              ) : (
+                // Below 720px the CSS turns each row into a card, using data-label as the field name.
+                <table className="expense-table">
+                  <caption className="visually-hidden">
+                    Expenses{category === 'All' ? '' : ` in ${category}`}, newest first
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Date</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">Paid by</th>
+                      <th scope="col" className="num">
+                        Amount
+                      </th>
+                      <th scope="col">Split</th>
+                      <th scope="col">
+                        <span className="visually-hidden">Actions</span>
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </>
-        )}
+                  </thead>
+                  <tbody>
+                    {visible.map((e) => (
+                      <tr key={e.id}>
+                        <td data-label="Date">
+                          <time dateTime={e.date}>{formatDate(e.date)}</time>
+                        </td>
+                        <td data-label="Description" className="description">
+                          {e.description}
+                        </td>
+                        <td data-label="Category">
+                          <span className={`chip chip-${e.category.toLowerCase()}`}>{e.category}</span>
+                        </td>
+                        <td data-label="Paid by">
+                          <span className="person">
+                            <Avatar name={memberName(e.paidBy)} index={memberIndex(e.paidBy)} size="sm" />
+                            {memberName(e.paidBy)}
+                          </span>
+                        </td>
+                        <td data-label="Amount" className="num">
+                          {formatINR(e.amount)}
+                        </td>
+                        <td data-label="Split" className="split">
+                          {describeSplit(e.split)}
+                        </td>
+                        <td className="actions">
+                          <button
+                            type="button"
+                            className="button-danger"
+                            aria-label={`Delete ${e.description}`}
+                            onClick={() => handleDelete(e)}
+                          >
+                            <TrashIcon />
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </>
+          )}
+        </div>
       </section>
     </>
   )
