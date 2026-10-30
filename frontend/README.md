@@ -3,6 +3,8 @@
 Five friends, one Goa trip, and nobody sure who owes whom. This app records shared expenses, splits
 each one equally, by exact amounts or by percentages, and shows everyone's balance.
 
+**Live:** [recruiterflow-frontend-assignment.vercel.app](https://recruiterflow-frontend-assignment.vercel.app)
+
 ## Running it
 
 You'll need Node 22.13 or newer.
