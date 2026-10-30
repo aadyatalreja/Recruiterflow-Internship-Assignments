@@ -1,14 +1,9 @@
 import { expect, test } from '@playwright/test'
 
-const apiKey = process.env.REQRES_API_KEY
-
-test.use({
-  baseURL: 'https://reqres.in',
-  extraHTTPHeaders: { 'x-api-key': apiKey ?? '' },
-})
-
+// The api project in playwright.config.ts sets the reqres.in base URL and sends this key as the
+// x-api-key header. Fail early with a clear message if it's missing, rather than with a 401.
 test.beforeAll(() => {
-  expect(apiKey, 'Set REQRES_API_KEY in qa/.env (copy .env.example)').toBeTruthy()
+  expect(process.env.REQRES_API_KEY, 'Set REQRES_API_KEY in qa/.env (copy .env.example)').toBeTruthy()
 })
 
 test('GET /api/users/2 returns the user with an email', async ({ request }) => {

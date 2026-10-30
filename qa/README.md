@@ -36,9 +36,10 @@ cp .env.example .env   # then paste your key into .env
 npx playwright test
 ```
 
-Run it from inside `qa/`. You can add `tests/ui` or `tests/api` to run just one half, `--headed`
-to watch the browser, or `--ui` to step through the tests one by one. If anything fails, an HTML
-report opens with a trace you can replay.
+Run it from inside `qa/`. The suite is split into two Playwright projects: `ui` (saucedemo in
+Chromium) and `api` (reqres.in, plain HTTP with no browser). Add `--project=ui` or `--project=api`
+to run just one half, `--headed` to watch the browser, or `--ui` to step through the tests one by
+one. If anything fails, an HTML report opens with a trace you can replay.
 
 ## What's covered
 
@@ -56,8 +57,9 @@ report opens with a trace you can replay.
 
 The login steps live in a small Page Object, [`pages/LoginPage.ts`](pages/LoginPage.ts) *(bonus)*,
 so the tests don't repeat them. For locators I stuck to `getByTestId` and `getByRole`: saucedemo
-puts a `data-test` attribute on its elements, so I set `testIdAttribute: 'data-test'` in
-[`playwright.config.ts`](playwright.config.ts) and used those instead of long CSS selectors.
+puts a `data-test` attribute on its elements, so I set `testIdAttribute: 'data-test'` for the `ui`
+project in [`playwright.config.ts`](playwright.config.ts) and used those instead of long CSS
+selectors.
 
 ## Reflection
 

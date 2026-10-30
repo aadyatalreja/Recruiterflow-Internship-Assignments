@@ -13,15 +13,28 @@ export default defineConfig({
   retries: 0,
   reporter: 'html',
   use: {
-    baseURL: 'https://www.saucedemo.com',
-    // saucedemo marks its elements with data-test="...", so getByTestId('login-button') finds them.
-    testIdAttribute: 'data-test',
     trace: 'retain-on-failure',
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      // Browser tests against the saucedemo shop, in Chromium.
+      name: 'ui',
+      testDir: './tests/ui',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://www.saucedemo.com',
+        // saucedemo marks its elements with data-test="...", so getByTestId('login-button') finds them.
+        testIdAttribute: 'data-test',
+      },
+    },
+    {
+      // HTTP-only tests against reqres.in. They use the request fixture, so no browser opens.
+      name: 'api',
+      testDir: './tests/api',
+      use: {
+        baseURL: 'https://reqres.in',
+        extraHTTPHeaders: { 'x-api-key': process.env.REQRES_API_KEY ?? '' },
+      },
     },
   ],
 })
